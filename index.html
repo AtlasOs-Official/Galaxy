@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galaxy OS Live Session</title>
+  <style>
+    :root {
+      --galaxy-accent: #9d4edd;
+      --galaxy-glow: #7b2cbf;
+      --mint-dark: #1a1829;
+      --mint-light-dark: #242038;
+      --mint-panel: #121020;
+      --text-color: #e0aaff;
+      --text-main: #f8f7ff;
+      --border-color: #3c096c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Ubuntu', 'Segoe UI', Roboto, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #240046 0%, #10002b 60%, #03001e 100%);
+      color: var(--text-main);
+    }
+
+    /* Helper class to hide uninstalled apps */
+    .installed-app {
+      display: none !important;
+    }
+
+    /* Main OS Layout */
+    #desktop {
+      height: calc(100vh - 40px);
+      width: 100vw;
+      position: relative;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 15px;
+    }
+
+    .shortcut {
+      width: 90px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .shortcut:hover {
+      background: rgba(157, 78, 221, 0.25);
+    }
+
+    .shortcut-icon {
+      font-size: 32px;
+      margin-bottom: 5px;
+      filter: drop-shadow(0 0 5px rgba(157, 78, 221, 0.6));
+    }
+
+    .shortcut-label {
+      font-size: 12px;
+      color: var(--text-main);
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+    }
+
+    /* Bottom Panel */
+    #panel {
+      height: 40px;
+      width: 100vw;
+      background-color: var(--mint-panel);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+      z-index: 9999;
+    }
+
+    .panel-left, .panel-right {
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
+
+    #start-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 15px;
+      height: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #start-btn:hover {
+      background-color: rgba(157, 78, 221, 0.2);
+    }
+
+    .galaxy-logo {
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(135deg, #e0aaff, #7b2cbf);
+      color: #10002b;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    #tasks-container {
+      display: flex;
+      gap: 4px;
+      height: 100%;
+      align-items: center;
+    }
+
+    .task-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 12px;
+      height: 32px;
+      background-color: var(--mint-light-dark);
+      border-bottom: 2px solid var(--galaxy-accent);
+      border-radius: 4px 4px 0 0;
+      font-size: 12px;
+      max-width: 150px;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+
+    .tray-clock {
+      padding: 0 15px;
+      font-size: 13px;
+      color: var(--text-color);
+    }
+
+    /* Start Menu */
+    #start-menu {
+      position: fixed;
+      bottom: 40px;
+      left: 0;
+      width: 320px;
+      height: 320px;
+      background-color: var(--mint-dark);
+      border: 1px solid var(--border-color);
+      border-bottom: none;
+      border-radius: 0 8px 0 0;
+      display: none;
+      flex-direction: column;
+      z-index: 9998;
+    }
+
+    .menu-header {
+      padding: 12px;
+      background: var(--mint-panel);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .menu-header input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--mint-light-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .menu-items {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    .menu-item:hover {
+      background-color: var(--galaxy-accent);
+      color: #fff;
+    }
+
+    /* Window Elements */
+    .window {
+      position: absolute;
+      top: 80px;
+      left: 150px;
+      width: 580px;
+      height: 380px;
+      background-color: var(--mint-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+      z-index: 10;
+      /* Removed global transition on top/left to fix movement lag */
+    }
+
+    .window.resizing-or-maximizing {
+      transition: top 0.15s ease, left 0.15s ease, width 0.15s ease, height 0.15s ease;
+    }
+
+    .window.is-dragging {
+      will-change: top, left;
+    }
+
+    /* Fullscreen state styling */
+    .window.maximized {
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: calc(100vh - 40px) !important;
+      border-radius: 0 !important;
+    }
+
+    .window-header {
+      height: 34px;
+      background-color: var(--mint-panel);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      border-radius: 7px 7px 0 0;
+      cursor: move;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .window.maximized .window-header {
+      border-radius: 0;
+      cursor: default;
+    }
+
+    .window-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--text-color);
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .win-btn {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #000;
+    }
+
+    .win-close { background-color: #ff5f56; }
+    .win-max { background-color: #27c93f; }
+
+    .window-body {
+      flex-grow: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* App Styles */
+    .installer-window {
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+    }
+
+    .installer-btn {
+      margin-top: 20px;
+      background: var(--galaxy-accent);
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      font-size: 15px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .installer-btn:hover {
+      background: var(--galaxy-glow);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 10px;
+      background: var(--mint-panel);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 20px;
+      display: none;
+      border: 1px solid var(--border-color);
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--galaxy-accent);
+      transition: width 0.1s linear;
+    }
+
+    .terminal-body {
+      background-color: #0c0a14;
+      color: #d8b4fe;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 14px;
+      padding: 15px;
+      height: 100%;
+    }
+
+    .browser-bar {
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+      background: var(--mint-panel);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .browser-bar input {
+      flex-grow: 1;
+      padding: 6px 12px;
+      background: var(--mint-light-dark);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .browser-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #fff;
+    }
+
+    /* Fix iframe capturing mouse drag events */
+    .window.is-dragging .browser-frame {
+      pointer-events: none;
+    }
+
+    .terminal-input-line {
+      display: flex;
+      gap: 8px;
+    }
+
+    .terminal-input {
+      background: transparent;
+      border: none;
+      color: #d8b4fe;
+      font-family: inherit;
+      font-size: inherit;
+      flex-grow: 1;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Desktop Icons -->
+  <div id="desktop">
+    <div class="shortcut" id="installer-shortcut" onclick="openInstaller()">
+      <div class="shortcut-icon">💿</div>
+      <div class="shortcut-label">Install Galaxy OS</div>
+    </div>
+    <div class="shortcut installed-app" onclick="openTerminal()">
+      <div class="shortcut-icon">💻</div>
+      <div class="shortcut-label">Terminal</div>
+    </div>
+    <div class="shortcut installed-app" onclick="openBrowser()">
+      <div class="shortcut-icon">🌐</div>
+      <div class="shortcut-label">Browser</div>
+    </div>
+    <div class="shortcut installed-app" onclick="openAppStore()">
+      <div class="shortcut-icon">🛍️</div>
+      <div class="shortcut-label">App Store</div>
+    </div>
+  </div>
+
+  <!-- Start Menu -->
+  <div id="start-menu">
+    <div class="menu-header">
+      <input type="text" placeholder="Search Galaxy OS...">
+    </div>
+    <div class="menu-items">
+      <div class="menu-item" id="installer-menu-item" onclick="openInstaller(); toggleStartMenu();">
+        <span>💿</span> Install Galaxy OS
+      </div>
+      <div class="menu-item installed-app" onclick="openTerminal(); toggleStartMenu();">
+        <span>💻</span> Terminal
+      </div>
+      <div class="menu-item installed-app" onclick="openBrowser(); toggleStartMenu();">
+        <span>🌐</span> Browser
+      </div>
+      <div class="menu-item installed-app" onclick="openAppStore(); toggleStartMenu();">
+        <span>🛍️</span> App Store
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Panel -->
+  <div id="panel">
+    <div class="panel-left">
+      <button id="start-btn" onclick="toggleStartMenu()">
+        <div class="galaxy-logo">G</div>
+        <span>Galaxy OS (Live)</span>
+      </button>
+      <div id="tasks-container"></div>
+    </div>
+    <div class="panel-right">
+      <div class="tray-clock" id="clock">12:00 PM</div>
+    </div>
+  </div>
+
+  <script>
+    let zIndexCounter = 100;
+    let installerWin = null;
+
+    // Live Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Start Menu Toggle
+    function toggleStartMenu() {
+      const menu = document.getElementById('start-menu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('start-menu');
+      const startBtn = document.getElementById('start-btn');
+      if (!menu.contains(e.target) && !startBtn.contains(e.target)) {
+        menu.style.display = 'none';
+      }
+    });
+
+    // Window Creation Logic
+    function createWindow(title, content, customClass = '') {
+      const win = document.createElement('div');
+      win.className = 'window';
+      win.style.zIndex = ++zIndexCounter;
+
+      win.style.top = (80 + (document.querySelectorAll('.window').length * 20)) + 'px';
+      win.style.left = (100 + (document.querySelectorAll('.window').length * 20)) + 'px';
+
+      win.innerHTML = `
+        <div class="window-header">
+          <span class="window-title">${title}</span>
+          <div class="window-controls">
+            <button class="win-btn win-max" onclick="toggleMaximize(this)" title="Maximize/Restore">+</button>
+            <button class="win-btn win-close" onclick="closeWindow(this)" title="Close">×</button>
+          </div>
+        </div>
+        <div class="window-body ${customClass}">${content}</div>
+      `;
+
+      document.body.appendChild(win);
+      makeDraggable(win);
+      win.addEventListener('mousedown', () => win.style.zIndex = ++zIndexCounter);
+      
+      addTaskbarItem(title, win);
+      return win;
+    }
+
+    function closeWindow(btn) {
+      const win = btn.closest('.window');
+      win.remove();
+    }
+
+    // Toggle Window Fullscreen/Maximize
+    function toggleMaximize(btn) {
+      const win = btn.closest('.window');
+      
+      win.classList.add('resizing-or-maximizing');
+      
+      if (!win.classList.contains('maximized')) {
+        win.dataset.prevTop = win.style.top;
+        win.dataset.prevLeft = win.style.left;
+        win.dataset.prevWidth = win.style.width;
+        win.dataset.prevHeight = win.style.height;
+
+        win.classList.add('maximized');
+        btn.innerText = '❐';
+      } else {
+        win.classList.remove('maximized');
+        win.style.top = win.dataset.prevTop || '80px';
+        win.style.left = win.dataset.prevLeft || '150px';
+        win.style.width = win.dataset.prevWidth || '580px';
+        win.style.height = win.dataset.prevHeight || '380px';
+        btn.innerText = '+';
+      }
+
+      setTimeout(() => win.classList.remove('resizing-or-maximizing'), 150);
+    }
+
+    // App: Galaxy OS Installer App
+    function openInstaller() {
+      if (document.getElementById('installer-window-el')) return;
+
+      const installerHTML = `
+        <div class="installer-window" id="installer-window-el">
+          <h2>Install Galaxy OS 1.0</h2>
+          <p style="margin-top: 10px; color: var(--text-color);">Welcome! Click below to begin installing Galaxy OS.</p>
+          <button class="installer-btn" id="install-btn" onclick="runInstallationProcess(this)">Install Now</button>
+          <div class="progress-bar-container" id="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+          </div>
+          <p id="install-status" style="margin-top: 12px; font-size: 13px; color: var(--text-color);"></p>
+        </div>
+      `;
+      installerWin = createWindow('Install Galaxy OS', installerHTML);
+    }
+
+    function runInstallationProcess(btn) {
+      btn.style.display = 'none';
+      const container = document.getElementById('progress-container');
+      const progressBar = document.getElementById('progress-bar');
+      const statusText = document.getElementById('install-status');
+
+      container.style.display = 'block';
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 2;
+        progressBar.style.width = progress + '%';
+        
+        if (progress < 35) statusText.innerText = "Partitioning drive space...";
+        else if (progress < 70) statusText.innerText = "Installing Galaxy OS system files...";
+        else if (progress < 95) statusText.innerText = "Configuring user settings...";
+        else statusText.innerText = "Installation complete!";
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            document.getElementById('installer-shortcut')?.remove();
+            document.getElementById('installer-menu-item')?.remove();
+            document.querySelector('#start-btn span').innerText = 'Galaxy OS';
+            
+            document.querySelectorAll('.installed-app').forEach(app => {
+              app.classList.remove('installed-app');
+            });
+            
+            if (installerWin) installerWin.remove();
+            alert("Galaxy OS has been successfully installed!");
+          }, 800);
+        }
+      }, 50);
+    }
+
+    // App: App Store Alert
+    function openAppStore() {
+      alert("no apps yet");
+    }
+
+    // App: Web Browser
+    function openBrowser() {
+      const browserHTML = `
+        <div class="browser-bar">
+          <input type="text" id="browser-url" value="https://wikipedia.org">
+          <button style="padding: 0 10px;" onclick="loadUrl(this)">Go</button>
+        </div>
+        <iframe class="browser-frame" src="https://wikipedia.org"></iframe>
+      `;
+      createWindow('Browser', browserHTML);
+    }
+
+    function loadUrl(btn) {
+      const win = btn.closest('.window');
+      const input = win.querySelector('#browser-url');
+      const iframe = win.querySelector('.browser-frame');
+      let url = input.value;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      iframe.src = url;
+    }
+
+    // App: Terminal
+    function openTerminal() {
+      const terminalHTML = `
+        <div>Galaxy OS v1.0 (Terminal Shell)</div>
+        <div>Type 'help' or 'clear'.</div><br>
+        <div id="term-output"></div>
+        <div class="terminal-input-line">
+          <span>user@galaxy-os:~$</span>
+          <input type="text" class="terminal-input" autofocus onkeydown="handleTerminal(event, this)">
+        </div>
+      `;
+      createWindow('Terminal', terminalHTML, 'terminal-body');
+    }
+
+    function handleTerminal(e, input) {
+      if (e.key === 'Enter') {
+        const command = input.value.trim();
+        const output = input.parentElement.previousElementSibling;
+        
+        let response = '';
+        if (command === 'help') {
+          response = 'Available commands: help, clear, whoami, date';
+        } else if (command === 'clear') {
+          output.innerHTML = '';
+          input.value = '';
+          return;
+        } else if (command === 'whoami') {
+          response = 'galaxy-user';
+        } else if (command === 'date') {
+          response = new Date().toString();
+        } else if (command !== '') {
+          response = `command not found: ${command}`;
+        }
+
+        output.innerHTML += `<div>user@galaxy-os:~$ ${command}</div>`;
+        if (response) {
+          output.innerHTML += `<div>${response}</div>`;
+        }
+        
+        input.value = '';
+        input.scrollIntoView();
+      }
+    }
+
+    // Taskbar Tabs
+    function addTaskbarItem(title, winElement) {
+      const container = document.getElementById('tasks-container');
+      const tab = document.createElement('div');
+      tab.className = 'task-tab';
+      tab.innerText = title;
+      tab.onclick = () => winElement.style.zIndex = ++zIndexCounter;
+      container.appendChild(tab);
+
+      const observer = new MutationObserver(() => {
+        if (!document.body.contains(winElement)) {
+          tab.remove();
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.body, { childList: true });
+    }
+
+    // High-Performance Window Dragging
+    function makeDraggable(elmnt) {
+      let startX = 0, startY = 0;
+      let initialLeft = 0, initialTop = 0;
+      let isDragging = false;
+      let animationFrameId = null;
+
+      const header = elmnt.querySelector('.window-header');
+
+      header.onmousedown = (e) => {
+        // Do not drag if maximized or if clicking window buttons
+        if (elmnt.classList.contains('maximized') || e.target.classList.contains('win-btn')) return;
+
+        e.preventDefault();
+
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = elmnt.offsetLeft;
+        initialTop = elmnt.offsetTop;
+        isDragging = true;
+
+        elmnt.classList.add('is-dragging');
+
+        document.onmousemove = onMouseMove;
+        document.onmouseup = stopDragging;
+      };
+
+      function onMouseMove(e) {
+        if (!isDragging) return;
+
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        // Cancel previous queued frame to prevent lag backlogs
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+        // Sync rendering directly to screen refresh rate
+        animationFrameId = requestAnimationFrame(() => {
+          elmnt.style.left = `${initialLeft + deltaX}px`;
+          elmnt.style.top = `${initialTop + deltaY}px`;
+        });
+      }
+
+      function stopDragging() {
+        isDragging = false;
+        elmnt.classList.remove('is-dragging');
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+        document.onmousemove = null;
+        document.onmouseup = null;
+      }
+    }
+  </script>
+</body>
+</html>
