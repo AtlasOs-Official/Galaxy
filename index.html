@@ -101,7 +101,7 @@
     #start-btn {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       padding: 0 15px;
       height: 100%;
       background: transparent;
@@ -115,17 +115,17 @@
       background-color: rgba(157, 78, 221, 0.2);
     }
 
-    .galaxy-logo {
-      width: 22px;
-      height: 22px;
-      background: linear-gradient(135deg, #e0aaff, #7b2cbf);
-      color: #10002b;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 13px;
+    /* Enhanced Planet Vector Start Logo */
+    .galaxy-logo-svg {
+      width: 24px;
+      height: 24px;
+      filter: drop-shadow(0 0 6px #c77dff);
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    #start-btn:hover .galaxy-logo-svg {
+      transform: scale(1.15) rotate(10deg);
+      filter: drop-shadow(0 0 10px #ff9e00);
     }
 
     #tasks-container {
@@ -162,7 +162,7 @@
       bottom: 40px;
       left: 0;
       width: 320px;
-      height: 320px;
+      height: 360px;
       background-color: var(--mint-dark);
       border: 1px solid var(--border-color);
       border-bottom: none;
@@ -193,6 +193,7 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      overflow-y: auto;
     }
 
     .menu-item {
@@ -217,7 +218,7 @@
       top: 80px;
       left: 150px;
       width: 580px;
-      height: 380px;
+      height: 420px;
       background-color: var(--mint-dark);
       border: 1px solid var(--border-color);
       border-radius: 8px 8px 0 0;
@@ -225,7 +226,6 @@
       flex-direction: column;
       box-shadow: 0 8px 25px rgba(0,0,0,0.8);
       z-index: 10;
-      /* Removed global transition on top/left to fix movement lag */
     }
 
     .window.resizing-or-maximizing {
@@ -236,7 +236,6 @@
       will-change: top, left;
     }
 
-    /* Fullscreen state styling */
     .window.maximized {
       top: 0 !important;
       left: 0 !important;
@@ -327,9 +326,9 @@
 
     .progress-bar-container {
       width: 100%;
-      height: 10px;
+      height: 12px;
       background: var(--mint-panel);
-      border-radius: 5px;
+      border-radius: 6px;
       overflow: hidden;
       margin-top: 20px;
       display: none;
@@ -339,7 +338,7 @@
     .progress-bar {
       width: 0%;
       height: 100%;
-      background: var(--galaxy-accent);
+      background: linear-gradient(90deg, #7b2cbf, #ff9e00);
       transition: width 0.1s linear;
     }
 
@@ -377,7 +376,6 @@
       background: #fff;
     }
 
-    /* Fix iframe capturing mouse drag events */
     .window.is-dragging .browser-frame {
       pointer-events: none;
     }
@@ -395,6 +393,212 @@
       font-size: inherit;
       flex-grow: 1;
       outline: none;
+    }
+
+    /* Square App Store Grid */
+    .appstore-container {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 170px));
+      gap: 20px;
+      overflow-y: auto;
+      height: 100%;
+      justify-content: center;
+    }
+
+    .app-card {
+      width: 170px;
+      height: 170px;
+      background: var(--mint-light-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      justify-content: space-between;
+    }
+
+    .app-card-icon {
+      font-size: 34px;
+      margin-top: 4px;
+    }
+
+    .app-card-title {
+      font-weight: bold;
+      color: var(--text-main);
+      font-size: 14px;
+    }
+
+    .app-card-desc {
+      font-size: 11px;
+      color: var(--text-color);
+      line-height: 1.2;
+    }
+
+    .app-card-btn {
+      background: var(--galaxy-accent);
+      border: none;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+      width: 100%;
+    }
+
+    .app-card-btn:disabled {
+      background: #3c3452;
+      cursor: default;
+    }
+
+    .app-card-progress-container {
+      width: 100%;
+      height: 8px;
+      background: var(--mint-panel);
+      border-radius: 4px;
+      overflow: hidden;
+      display: none;
+      border: 1px solid var(--border-color);
+    }
+
+    .app-card-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #7b2cbf, #ff9e00);
+      transition: width 0.1s linear;
+    }
+
+    /* File Runner UI */
+    .file-runner-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 12px;
+      gap: 10px;
+      background: #0d0a18;
+      position: relative;
+    }
+
+    .file-runner-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .file-runner-controls select, 
+    .file-runner-controls button, 
+    .file-runner-btn-upload {
+      background: var(--mint-light-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 4px;
+      outline: none;
+      font-size: 12px;
+    }
+
+    .file-runner-btn-upload {
+      background: #3c096c;
+      cursor: pointer;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .file-runner-btn-upload:hover {
+      background: var(--galaxy-accent);
+    }
+
+    .file-runner-controls button.run-btn {
+      background: var(--galaxy-accent);
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .file-runner-controls button.fullscreen-btn {
+      background: #242038;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    .file-runner-controls button.fullscreen-btn:hover {
+      background: #3c096c;
+    }
+
+    .file-runner-editor {
+      flex-grow: 1;
+      width: 100%;
+      background: #141024;
+      border: 1px solid var(--border-color);
+      color: #e0aaff;
+      font-family: 'Consolas', monospace;
+      padding: 10px;
+      border-radius: 4px;
+      outline: none;
+      resize: none;
+    }
+
+    .file-runner-preview-wrapper {
+      position: relative;
+      height: 180px;
+      background: #000;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .file-runner-preview {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+    }
+
+    /* Fullscreen mode inside the app window */
+    .file-runner-container.fullscreen-preview .file-runner-controls,
+    .file-runner-container.fullscreen-preview .file-runner-editor {
+      display: none !important;
+    }
+
+    .file-runner-container.fullscreen-preview .file-runner-preview-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      border: none;
+      z-index: 100;
+    }
+
+    .exit-fullscreen-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(20, 16, 36, 0.85);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      z-index: 101;
+      display: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .exit-fullscreen-btn:hover {
+      background: var(--galaxy-accent);
+    }
+
+    .file-runner-container.fullscreen-preview .exit-fullscreen-btn {
+      display: block;
     }
   </style>
 </head>
@@ -418,6 +622,10 @@
       <div class="shortcut-icon">🛍️</div>
       <div class="shortcut-label">App Store</div>
     </div>
+    <div class="shortcut installed-app file-runner-app" onclick="openFileRunner()">
+      <div class="shortcut-icon">⚙️</div>
+      <div class="shortcut-label">File Runner</div>
+    </div>
   </div>
 
   <!-- Start Menu -->
@@ -438,6 +646,9 @@
       <div class="menu-item installed-app" onclick="openAppStore(); toggleStartMenu();">
         <span>🛍️</span> App Store
       </div>
+      <div class="menu-item installed-app file-runner-app" onclick="openFileRunner(); toggleStartMenu();">
+        <span>⚙️</span> File Runner
+      </div>
     </div>
   </div>
 
@@ -445,8 +656,24 @@
   <div id="panel">
     <div class="panel-left">
       <button id="start-btn" onclick="toggleStartMenu()">
-        <div class="galaxy-logo">G</div>
-        <span>Galaxy OS (Live)</span>
+        <!-- Galaxy Logo SVG -->
+        <svg class="galaxy-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="30" fill="url(#planetGradient)"/>
+          <ellipse cx="50" cy="50" rx="46" ry="14" stroke="url(#ringGradient)" stroke-width="6" transform="rotate(-25 50 50)"/>
+          <defs>
+            <linearGradient id="planetGradient" x1="20" y1="20" x2="80" y2="80">
+              <stop offset="0%" stop-color="#ff9e00" />
+              <stop offset="50%" stop-color="#c77dff" />
+              <stop offset="100%" stop-color="#3c096c" />
+            </linearGradient>
+            <linearGradient id="ringGradient" x1="0" y1="0" x2="100" y2="0">
+              <stop offset="0%" stop-color="#e0aaff" stop-opacity="0.3" />
+              <stop offset="50%" stop-color="#ffffff" />
+              <stop offset="100%" stop-color="#9d4edd" stop-opacity="0.3" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <span>Galaxy OS</span>
       </button>
       <div id="tasks-container"></div>
     </div>
@@ -458,6 +685,7 @@
   <script>
     let zIndexCounter = 100;
     let installerWin = null;
+    let isFileRunnerInstalled = false;
 
     // Live Clock
     function updateClock() {
@@ -533,14 +761,34 @@
         win.style.top = win.dataset.prevTop || '80px';
         win.style.left = win.dataset.prevLeft || '150px';
         win.style.width = win.dataset.prevWidth || '580px';
-        win.style.height = win.dataset.prevHeight || '380px';
+        win.style.height = win.dataset.prevHeight || '420px';
         btn.innerText = '+';
       }
 
       setTimeout(() => win.classList.remove('resizing-or-maximizing'), 150);
     }
 
-    // App: Galaxy OS Installer App
+    // Generic 10-Second Loader
+    function runTenSecondProgress(barElement, statusCallback, completeCallback) {
+      const totalTimeMs = 10000;
+      const intervalMs = 100;
+      let elapsedTime = 0;
+
+      const interval = setInterval(() => {
+        elapsedTime += intervalMs;
+        const progress = Math.min((elapsedTime / totalTimeMs) * 100, 100);
+        barElement.style.width = progress + '%';
+
+        if (statusCallback) statusCallback(progress);
+
+        if (elapsedTime >= totalTimeMs) {
+          clearInterval(interval);
+          if (completeCallback) completeCallback();
+        }
+      }, intervalMs);
+    }
+
+    // App: Galaxy OS Installer App (10s progress)
     function openInstaller() {
       if (document.getElementById('installer-window-el')) return;
 
@@ -566,37 +814,183 @@
 
       container.style.display = 'block';
 
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 2;
-        progressBar.style.width = progress + '%';
-        
-        if (progress < 35) statusText.innerText = "Partitioning drive space...";
-        else if (progress < 70) statusText.innerText = "Installing Galaxy OS system files...";
-        else if (progress < 95) statusText.innerText = "Configuring user settings...";
-        else statusText.innerText = "Installation complete!";
-
-        if (progress >= 100) {
-          clearInterval(interval);
+      runTenSecondProgress(
+        progressBar,
+        (progress) => {
+          if (progress < 30) statusText.innerText = "Partitioning drive space...";
+          else if (progress < 65) statusText.innerText = "Installing Galaxy OS system files...";
+          else if (progress < 95) statusText.innerText = "Configuring user settings...";
+          else statusText.innerText = "Installation complete!";
+        },
+        () => {
           setTimeout(() => {
             document.getElementById('installer-shortcut')?.remove();
             document.getElementById('installer-menu-item')?.remove();
-            document.querySelector('#start-btn span').innerText = 'Galaxy OS';
             
-            document.querySelectorAll('.installed-app').forEach(app => {
+            document.querySelectorAll('.installed-app:not(.file-runner-app)').forEach(app => {
               app.classList.remove('installed-app');
             });
             
             if (installerWin) installerWin.remove();
             alert("Galaxy OS has been successfully installed!");
-          }, 800);
+          }, 300);
         }
-      }, 50);
+      );
     }
 
-    // App: App Store Alert
+    // App: Functional App Store (Square cards + 10s progress loader)
     function openAppStore() {
-      alert("no apps yet");
+      const storeHTML = `
+        <div class="appstore-container">
+          <div class="app-card">
+            <div class="app-card-icon">⚙️</div>
+            <div class="app-card-title">File Runner</div>
+            <div class="app-card-desc">Execute custom HTML and .bat files.</div>
+            <button class="app-card-btn" id="fr-install-btn" onclick="installFileRunnerApp(this)" ${isFileRunnerInstalled ? 'disabled' : ''}>
+              ${isFileRunnerInstalled ? 'Installed' : 'Install'}
+            </button>
+            <div class="app-card-progress-container" id="fr-progress-container">
+              <div class="app-card-progress-bar" id="fr-progress-bar"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      createWindow('App Store', storeHTML);
+    }
+
+    function installFileRunnerApp(btn) {
+      if (isFileRunnerInstalled) return;
+
+      const card = btn.closest('.app-card');
+      const progressContainer = card.querySelector('.app-card-progress-container');
+      const progressBar = card.querySelector('.app-card-progress-bar');
+
+      btn.style.display = 'none';
+      progressContainer.style.display = 'block';
+
+      runTenSecondProgress(
+        progressBar,
+        null,
+        () => {
+          isFileRunnerInstalled = true;
+          progressContainer.style.display = 'none';
+          btn.innerText = "Installed";
+          btn.style.display = 'block';
+          btn.disabled = true;
+
+          document.querySelectorAll('.file-runner-app').forEach(app => {
+            app.classList.remove('installed-app');
+          });
+          alert("File Runner installed successfully!");
+        }
+      );
+    }
+
+    // App: File Runner (.html & .bat executor + File Uploader + Fullscreen Preview)
+    function openFileRunner() {
+      const runnerHTML = `
+        <div class="file-runner-container">
+          <div class="file-runner-controls">
+            <label style="font-size: 12px;">Type:</label>
+            <select id="file-type-select" onchange="updateDefaultScriptTemplate(this)">
+              <option value="html">HTML File (.html)</option>
+              <option value="bat">Batch Script (.bat)</option>
+            </select>
+            
+            <label class="file-runner-btn-upload">
+              📁 Upload File
+              <input type="file" accept=".html,.htm,.bat" style="display: none;" onchange="handleFileUpload(this)">
+            </label>
+
+            <button class="run-btn" onclick="executeRunnerScript(this)">Run File</button>
+            <button class="fullscreen-btn" onclick="togglePreviewFullscreen(this)">⛶ Fullscreen Preview</button>
+          </div>
+          <textarea class="file-runner-editor" id="file-code-input" placeholder="Enter file code or upload a file above..."><h1 style="color: #9d4edd; font-family: sans-serif;">Hello from Galaxy OS!</h1>\n<p style="color: #fff;">HTML file successfully rendered.</p></textarea>
+          <div class="file-runner-preview-wrapper">
+            <button class="exit-fullscreen-btn" onclick="togglePreviewFullscreen(this)">✕ Exit Fullscreen</button>
+            <div class="file-runner-preview" id="file-runner-output"></div>
+          </div>
+        </div>
+      `;
+      createWindow('File Runner', runnerHTML);
+    }
+
+    function togglePreviewFullscreen(btn) {
+      const container = btn.closest('.file-runner-container');
+      container.classList.toggle('fullscreen-preview');
+    }
+
+    function handleFileUpload(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const container = input.closest('.file-runner-container');
+      const select = container.querySelector('#file-type-select');
+      const editor = container.querySelector('#file-code-input');
+
+      const fileName = file.name.toLowerCase();
+      if (fileName.endsWith('.bat')) {
+        select.value = 'bat';
+      } else if (fileName.endsWith('.html') || fileName.endsWith('.htm')) {
+        select.value = 'html';
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        editor.value = e.target.result;
+      };
+      reader.readAsText(file);
+    }
+
+    function updateDefaultScriptTemplate(select) {
+      const editor = select.closest('.file-runner-container').querySelector('#file-code-input');
+      if (select.value === 'html') {
+        editor.value = `<h1 style="color: #9d4edd; font-family: sans-serif;">Hello from Galaxy OS!</h1>\n<p style="color: #fff;">HTML file successfully rendered.</p>`;
+      } else if (select.value === 'bat') {
+        editor.value = `@echo off\necho Initializing Galaxy OS Batch Runner...\necho System check: OK\necho Process complete!`;
+      }
+    }
+
+    function executeRunnerScript(btn) {
+      const container = btn.closest('.file-runner-container');
+      const type = container.querySelector('#file-type-select').value;
+      const code = container.querySelector('#file-code-input').value;
+      const output = container.querySelector('#file-runner-output');
+
+      output.innerHTML = '';
+
+      if (type === 'html') {
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.background = '#ffffff';
+        output.appendChild(iframe);
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(code);
+        iframe.contentWindow.document.close();
+      } else if (type === 'bat') {
+        const consoleDiv = document.createElement('div');
+        consoleDiv.style.padding = '12px';
+        consoleDiv.style.color = '#00ff66';
+        consoleDiv.style.fontFamily = 'monospace';
+        consoleDiv.style.fontSize = '13px';
+        consoleDiv.style.whiteSpace = 'pre-wrap';
+
+        const lines = code.split('\n');
+        let outputText = '';
+        lines.forEach(line => {
+          let trimmed = line.trim();
+          if (trimmed.startsWith('echo ')) {
+            outputText += trimmed.substring(5) + '\n';
+          } else if (trimmed !== '@echo off' && trimmed !== '') {
+            outputText += `>'${trimmed}' is executed.\n`;
+          }
+        });
+
+        consoleDiv.innerText = outputText || 'Batch execution completed with no output.';
+        output.appendChild(consoleDiv);
+      }
     }
 
     // App: Web Browser
@@ -694,7 +1088,6 @@
       const header = elmnt.querySelector('.window-header');
 
       header.onmousedown = (e) => {
-        // Do not drag if maximized or if clicking window buttons
         if (elmnt.classList.contains('maximized') || e.target.classList.contains('win-btn')) return;
 
         e.preventDefault();
@@ -717,10 +1110,8 @@
         const deltaX = e.clientX - startX;
         const deltaY = e.clientY - startY;
 
-        // Cancel previous queued frame to prevent lag backlogs
         if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
-        // Sync rendering directly to screen refresh rate
         animationFrameId = requestAnimationFrame(() => {
           elmnt.style.left = `${initialLeft + deltaX}px`;
           elmnt.style.top = `${initialTop + deltaY}px`;
