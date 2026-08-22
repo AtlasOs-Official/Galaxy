@@ -644,6 +644,10 @@
       <div class="shortcut-icon">💬</div>
       <div class="shortcut-label">RealChat</div>
     </div>
+    <div class="shortcut installed-app yt2-app" onclick="openYt2()">
+      <div class="shortcut-icon">📺</div>
+      <div class="shortcut-label">YT 2</div>
+    </div>
   </div>
 
   <!-- Start Menu -->
@@ -669,6 +673,9 @@
       </div>
       <div class="menu-item installed-app realchat-app" onclick="openRealChat(); toggleStartMenu();">
         <span>💬</span> RealChat
+      </div>
+      <div class="menu-item installed-app yt2-app" onclick="openYt2(); toggleStartMenu();">
+        <span>📺</span> YT 2
       </div>
     </div>
   </div>
@@ -708,6 +715,7 @@
     let installerWin = null;
     let isFileRunnerInstalled = false;
     let isRealChatInstalled = false;
+    let isYt2Installed = false;
 
     // Live Clock
     function updateClock() {
@@ -790,27 +798,26 @@
       setTimeout(() => win.classList.remove('resizing-or-maximizing'), 150);
     }
 
-    // Generic 10-Second Loader
-    function runTenSecondProgress(barElement, statusCallback, completeCallback) {
-      const totalTimeMs = 10000;
+    // Progress Loader Function supporting custom durations
+    function runTimedProgress(barElement, durationMs, statusCallback, completeCallback) {
       const intervalMs = 100;
       let elapsedTime = 0;
 
       const interval = setInterval(() => {
         elapsedTime += intervalMs;
-        const progress = Math.min((elapsedTime / totalTimeMs) * 100, 100);
+        const progress = Math.min((elapsedTime / durationMs) * 100, 100);
         barElement.style.width = progress + '%';
 
         if (statusCallback) statusCallback(progress);
 
-        if (elapsedTime >= totalTimeMs) {
+        if (elapsedTime >= durationMs) {
           clearInterval(interval);
           if (completeCallback) completeCallback();
         }
       }, intervalMs);
     }
 
-    // App: Galaxy OS Installer App (10s progress)
+    // App: Galaxy OS Installer App (30s progress)
     function openInstaller() {
       if (document.getElementById('installer-window-el')) return;
 
@@ -836,12 +843,16 @@
 
       container.style.display = 'block';
 
-      runTenSecondProgress(
+      // 30 Seconds = 30,000 ms
+      runTimedProgress(
         progressBar,
+        30000,
         (progress) => {
-          if (progress < 30) statusText.innerText = "Partitioning drive space...";
-          else if (progress < 65) statusText.innerText = "Installing Galaxy OS system files...";
-          else if (progress < 95) statusText.innerText = "Configuring user settings...";
+          if (progress < 20) statusText.innerText = "Initializing system disk partition...";
+          else if (progress < 45) statusText.innerText = "Extracting Galaxy OS core packages...";
+          else if (progress < 70) statusText.innerText = "Installing core system dependencies...";
+          else if (progress < 90) statusText.innerText = "Configuring user workspace settings...";
+          else if (progress < 100) statusText.innerText = "Finalizing installation...";
           else statusText.innerText = "Installation complete!";
         },
         () => {
@@ -849,7 +860,7 @@
             document.getElementById('installer-shortcut')?.remove();
             document.getElementById('installer-menu-item')?.remove();
             
-            document.querySelectorAll('.installed-app:not(.file-runner-app):not(.realchat-app)').forEach(app => {
+            document.querySelectorAll('.installed-app:not(.file-runner-app):not(.realchat-app):not(.yt2-app)').forEach(app => {
               app.classList.remove('installed-app');
             });
             
@@ -887,6 +898,18 @@
               <div class="app-card-progress-bar"></div>
             </div>
           </div>
+
+          <div class="app-card">
+            <div class="app-card-icon">📺</div>
+            <div class="app-card-title">YT 2</div>
+            <div class="app-card-desc">Watch video streams and content across Galaxy.</div>
+            <button class="app-card-btn" onclick="installYt2App(this)" ${isYt2Installed ? 'disabled' : ''}>
+              ${isYt2Installed ? 'Installed' : 'Install'}
+            </button>
+            <div class="app-card-progress-container">
+              <div class="app-card-progress-bar"></div>
+            </div>
+          </div>
         </div>
       `;
       createWindow('App Store', storeHTML);
@@ -902,8 +925,9 @@
       btn.style.display = 'none';
       progressContainer.style.display = 'block';
 
-      runTenSecondProgress(
+      runTimedProgress(
         progressBar,
+        10000,
         null,
         () => {
           isFileRunnerInstalled = true;
@@ -930,8 +954,9 @@
       btn.style.display = 'none';
       progressContainer.style.display = 'block';
 
-      runTenSecondProgress(
+      runTimedProgress(
         progressBar,
+        10000,
         null,
         () => {
           isRealChatInstalled = true;
@@ -948,12 +973,49 @@
       );
     }
 
+    function installYt2App(btn) {
+      if (isYt2Installed) return;
+
+      const card = btn.closest('.app-card');
+      const progressContainer = card.querySelector('.app-card-progress-container');
+      const progressBar = card.querySelector('.app-card-progress-bar');
+
+      btn.style.display = 'none';
+      progressContainer.style.display = 'block';
+
+      runTimedProgress(
+        progressBar,
+        10000,
+        null,
+        () => {
+          isYt2Installed = true;
+          progressContainer.style.display = 'none';
+          btn.innerText = "Installed";
+          btn.style.display = 'block';
+          btn.disabled = true;
+
+          document.querySelectorAll('.yt2-app').forEach(app => {
+            app.classList.remove('installed-app');
+          });
+          alert("YT 2 installed successfully!");
+        }
+      );
+    }
+
     // App: RealChat
     function openRealChat() {
       const realChatHTML = `
         <iframe class="browser-frame" src="https://AtlasOs-Official.github.io/Galaxy/chats.html" style="width: 100%; height: 100%; border: none; background: #000;"></iframe>
       `;
       createWindow('RealChat', realChatHTML);
+    }
+
+    // App: YT 2
+    function openYt2() {
+      const yt2HTML = `
+        <iframe class="browser-frame" src="https://AtlasOs-Official.github.io/Galaxy/yt2.html" style="width: 100%; height: 100%; border: none; background: #000;"></iframe>
+      `;
+      createWindow('YT 2', yt2HTML);
     }
 
     // App: File Runner (.html, .bat, Audio, Video, & Picture Executor)
