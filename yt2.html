@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YT 2</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background-color: #0f0f0f; color: #fff; }
+
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 16px; height: 56px; background: #0f0f0f; border-bottom: 1px solid #272727;
+    }
+    .logo { font-size: 20px; font-weight: bold; color: #ff0000; text-decoration: none; }
+    .logo span { color: #fff; }
+    .search-bar { display: flex; flex: 0 1 600px; }
+    .search-bar input {
+      width: 100%; padding: 8px 16px; background: #121212; border: 1px solid #303030;
+      border-radius: 40px 0 0 40px; color: #fff; outline: none;
+    }
+    .search-bar button {
+      padding: 0 20px; background: #222; border: 1px solid #303030;
+      border-left: none; border-radius: 0 40px 40px 0; color: #fff; cursor: pointer;
+    }
+
+    .container { display: flex; min-height: calc(100vh - 56px); }
+
+    .sidebar { width: 240px; padding: 12px; background: #0f0f0f; flex-shrink: 0; }
+    .nav-item {
+      display: flex; align-items: center; padding: 10px 12px;
+      color: #fff; text-decoration: none; border-radius: 10px; margin-bottom: 4px;
+    }
+    .nav-item:hover { background: #272727; }
+
+    .main-content { flex: 1; padding: 24px; }
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .video-card { text-decoration: none; color: inherit; display: block; }
+    .thumbnail-container {
+      position: relative; width: 100%; aspect-ratio: 16 / 9;
+      background: #272727; border-radius: 12px; overflow: hidden;
+    }
+    .thumbnail-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .video-info { display: flex; gap: 12px; margin-top: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .details h3 { font-size: 14px; line-height: 1.4; margin-bottom: 4px; color: #fff; }
+    .details p { font-size: 12px; color: #aaa; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <a href="index.html" class="logo">YT <span>2</span></a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search">
+      <button>🔍</button>
+    </div>
+    <div style="width: 32px; height: 32px; background: #0073e6; border-radius: 50%;"></div>
+  </header>
+
+  <div class="container">
+    <aside class="sidebar">
+      <a href="index.html" class="nav-item">🏠 Home</a>
+      <a href="#" class="nav-item">📺 Subscriptions</a>
+      <hr style="border-color: #272727; margin: 12px 0;">
+      <a href="#" class="nav-item">📁 Library</a>
+      <a href="#" class="nav-item">📜 History</a>
+    </aside>
+
+    <main class="main-content">
+      <div class="video-grid">
+
+        <!-- Video Card linking to watch page -->
+        <a href="watch.html?v=video1.mp4" class="video-card">
+          <div class="thumbnail-container">
+            <img class="thumbnail-img" src="https://img.youtube.com/vi/m_zK6pIqtLM/hqdefault.jpg" alt="Rec Room edit">
+          </div>
+          <div class="video-info">
+            <img class="avatar" src="https://yt3.googleusercontent.com/O9ACW-aeAp4jVBBq6M2dVgRu-BMNpsOjAH-3gq29fuK-jl3Q-DscuJVz2n30CBfiiMWZhhzl0EQ=s160-c-k-c0x00ffffff-no-rj" alt="Profile">
+            <div class="details">
+              <h3>Rec Room edit (lucy~) - Final Farewell</h3>
+              <p>Thumblicker</p>
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </main>
+  </div>
+
+</body>
+</html>
