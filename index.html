@@ -558,6 +558,20 @@
       width: 100%;
       height: 100%;
       overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-runner-preview img,
+    .file-runner-preview video {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .file-runner-preview audio {
+      width: 80%;
     }
 
     /* Fullscreen mode inside the app window */
@@ -604,6 +618,7 @@
 </head>
 <body>
 
+  <!-- Desktop Icons -->
   <div id="desktop">
     <div class="shortcut" id="installer-shortcut" onclick="openInstaller()">
       <div class="shortcut-icon">💿</div>
@@ -631,6 +646,7 @@
     </div>
   </div>
 
+  <!-- Start Menu -->
   <div id="start-menu">
     <div class="menu-header">
       <input type="text" placeholder="Search Galaxy OS...">
@@ -657,9 +673,11 @@
     </div>
   </div>
 
+  <!-- Bottom Panel -->
   <div id="panel">
     <div class="panel-left">
       <button id="start-btn" onclick="toggleStartMenu()">
+        <!-- Galaxy Logo SVG -->
         <svg class="galaxy-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="50" cy="50" r="30" fill="url(#planetGradient)"/>
           <ellipse cx="50" cy="50" rx="46" ry="14" stroke="url(#ringGradient)" stroke-width="6" transform="rotate(-25 50 50)"/>
@@ -849,7 +867,7 @@
           <div class="app-card">
             <div class="app-card-icon">⚙️</div>
             <div class="app-card-title">File Runner</div>
-            <div class="app-card-desc">Execute custom HTML and .bat files.</div>
+            <div class="app-card-desc">Execute HTML, scripts, audio, video, & images.</div>
             <button class="app-card-btn" onclick="installFileRunnerApp(this)" ${isFileRunnerInstalled ? 'disabled' : ''}>
               ${isFileRunnerInstalled ? 'Installed' : 'Install'}
             </button>
@@ -938,7 +956,7 @@
       createWindow('RealChat', realChatHTML);
     }
 
-    // App: File Runner (.html & .bat executor + File Uploader + Fullscreen Preview)
+    // App: File Runner (.html, .bat, Audio, Video, & Picture Executor)
     function openFileRunner() {
       const runnerHTML = `
         <div class="file-runner-container">
@@ -947,17 +965,20 @@
             <select id="file-type-select" onchange="updateDefaultScriptTemplate(this)">
               <option value="html">HTML File (.html)</option>
               <option value="bat">Batch Script (.bat)</option>
+              <option value="image">Image (.png, .jpg, .gif, .svg)</option>
+              <option value="audio">Audio (.mp3, .wav, .ogg)</option>
+              <option value="video">Video (.mp4, .webm, .ogg)</option>
             </select>
             
             <label class="file-runner-btn-upload">
               📁 Upload File
-              <input type="file" accept=".html,.htm,.bat" style="display: none;" onchange="handleFileUpload(this)">
+              <input type="file" accept=".html,.htm,.bat,.png,.jpg,.jpeg,.gif,.svg,.webp,.mp3,.wav,.ogg,.mp4,.webm" style="display: none;" onchange="handleFileUpload(this)">
             </label>
 
-            <button class="run-btn" onclick="executeRunnerScript(this)">Run File</button>
+            <button class="run-btn" onclick="executeRunnerScript(this)">Run / Preview File</button>
             <button class="fullscreen-btn" onclick="togglePreviewFullscreen(this)">⛶ Fullscreen Preview</button>
           </div>
-          <textarea class="file-runner-editor" id="file-code-input" placeholder="Enter file code or upload a file above..."><h1 style="color: #9d4edd; font-family: sans-serif;">Hello from Galaxy OS!</h1>\n<p style="color: #fff;">HTML file successfully rendered.</p></textarea>
+          <textarea class="file-runner-editor" id="file-code-input" placeholder="Enter file code, direct media URL, or upload a file above..."><h1 style="color: #9d4edd; font-family: sans-serif;">Hello from Galaxy OS!</h1>\n<p style="color: #fff;">HTML file successfully rendered.</p></textarea>
           <div class="file-runner-preview-wrapper">
             <button class="exit-fullscreen-btn" onclick="togglePreviewFullscreen(this)">✕ Exit Fullscreen</button>
             <div class="file-runner-preview" id="file-runner-output"></div>
@@ -981,32 +1002,59 @@
       const editor = container.querySelector('#file-code-input');
 
       const fileName = file.name.toLowerCase();
+      
+      // Automatic extension detection
       if (fileName.endsWith('.bat')) {
         select.value = 'bat';
       } else if (fileName.endsWith('.html') || fileName.endsWith('.htm')) {
         select.value = 'html';
+      } else if (/\.(png|jpe?g|gif|svg|webp)$/i.test(fileName)) {
+        select.value = 'image';
+      } else if (/\.(mp3|wav|ogg)$/i.test(fileName)) {
+        select.value = 'audio';
+      } else if (/\.(mp4|webm)$/i.test(fileName)) {
+        select.value = 'video';
       }
 
       const reader = new FileReader();
-      reader.onload = function(e) {
-        editor.value = e.target.result;
-      };
-      reader.readAsText(file);
+
+      // Read text vs media objects
+      if (select.value === 'html' || select.value === 'bat') {
+        reader.onload = function(e) {
+          editor.value = e.target.result;
+          executeRunnerScript(input);
+        };
+        reader.readAsText(file);
+      } else {
+        reader.onload = function(e) {
+          editor.value = e.target.result; // Data URL for media
+          executeRunnerScript(input);
+        };
+        reader.readAsDataURL(file);
+      }
     }
 
     function updateDefaultScriptTemplate(select) {
       const editor = select.closest('.file-runner-container').querySelector('#file-code-input');
-      if (select.value === 'html') {
+      const type = select.value;
+
+      if (type === 'html') {
         editor.value = `<h1 style="color: #9d4edd; font-family: sans-serif;">Hello from Galaxy OS!</h1>\n<p style="color: #fff;">HTML file successfully rendered.</p>`;
-      } else if (select.value === 'bat') {
+      } else if (type === 'bat') {
         editor.value = `@echo off\necho Initializing Galaxy OS Batch Runner...\necho System check: OK\necho Process complete!`;
+      } else if (type === 'image') {
+        editor.value = `https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80`;
+      } else if (type === 'audio') {
+        editor.value = `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3`;
+      } else if (type === 'video') {
+        editor.value = `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4`;
       }
     }
 
     function executeRunnerScript(btn) {
       const container = btn.closest('.file-runner-container');
       const type = container.querySelector('#file-type-select').value;
-      const code = container.querySelector('#file-code-input').value;
+      const content = container.querySelector('#file-code-input').value.trim();
       const output = container.querySelector('#file-runner-output');
 
       output.innerHTML = '';
@@ -1019,7 +1067,7 @@
         iframe.style.background = '#ffffff';
         output.appendChild(iframe);
         iframe.contentWindow.document.open();
-        iframe.contentWindow.document.write(code);
+        iframe.contentWindow.document.write(content);
         iframe.contentWindow.document.close();
       } else if (type === 'bat') {
         const consoleDiv = document.createElement('div');
@@ -1028,8 +1076,9 @@
         consoleDiv.style.fontFamily = 'monospace';
         consoleDiv.style.fontSize = '13px';
         consoleDiv.style.whiteSpace = 'pre-wrap';
+        consoleDiv.style.width = '100%';
 
-        const lines = code.split('\n');
+        const lines = content.split('\n');
         let outputText = '';
         lines.forEach(line => {
           let trimmed = line.trim();
@@ -1042,6 +1091,23 @@
 
         consoleDiv.innerText = outputText || 'Batch execution completed with no output.';
         output.appendChild(consoleDiv);
+      } else if (type === 'image') {
+        const img = document.createElement('img');
+        img.src = content;
+        img.alt = 'Image Preview';
+        output.appendChild(img);
+      } else if (type === 'audio') {
+        const audio = document.createElement('audio');
+        audio.controls = true;
+        audio.autoplay = true;
+        audio.src = content;
+        output.appendChild(audio);
+      } else if (type === 'video') {
+        const video = document.createElement('video');
+        video.controls = true;
+        video.autoplay = true;
+        video.src = content;
+        output.appendChild(video);
       }
     }
 
