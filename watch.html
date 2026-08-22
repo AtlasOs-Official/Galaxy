@@ -15,15 +15,22 @@
     .logo { font-size: 20px; font-weight: bold; color: #ff0000; text-decoration: none; }
     .logo span { color: #fff; }
 
+    .close-btn {
+      color: #aaa; text-decoration: none; font-size: 24px; font-weight: bold;
+      width: 36px; height: 36px; display: flex; align-items: center;
+      justify-content: center; border-radius: 50%; transition: background 0.2s;
+    }
+    .close-btn:hover { background: #272727; color: #fff; }
+
     .watch-container {
       max-width: 1280px; margin: 20px auto; padding: 0 16px;
       display: flex; flex-direction: column; gap: 16px;
     }
     .player-box {
       width: 100%; aspect-ratio: 16 / 9; background: #000;
-      border-radius: 12px; overflow: hidden;
+      border-radius: 12px; overflow: hidden; position: relative;
     }
-    video { width: 100%; height: 100%; outline: none; }
+    video { width: 100%; height: 100%; outline: none; display: block; }
     
     .video-details { display: flex; flex-direction: column; gap: 12px; }
     .title { font-size: 20px; font-weight: bold; }
@@ -35,14 +42,16 @@
 <body>
 
   <header class="header">
-    <a href="index.html" class="logo">YT <span>2</span></a>
+    <a href="yt2.html" class="logo">YT <span>2</span></a>
+    <!-- Close Button -->
+    <a href="yt2.html" class="close-btn" title="Close player">✕</a>
   </header>
 
   <div class="watch-container">
     <div class="player-box">
-      <video id="mainPlayer" controls autoplay>
+      <video id="mainPlayer" controls autoplay playsinline preload="metadata">
         <source id="videoSource" src="video1.mp4" type="video/mp4">
-        Your browser does not support the video tag.
+        Your browser does not support HTML5 video.
       </video>
     </div>
 
@@ -56,15 +65,14 @@
   </div>
 
   <script>
-    // URL parameter parsing so you can pass ?v=yourfile.mp4 dynamically
     const params = new URLSearchParams(window.location.search);
-    const videoFile = params.get('v');
-    if (videoFile) {
-      const player = document.getElementById('mainPlayer');
-      const source = document.getElementById('videoSource');
-      source.src = videoFile;
-      player.load();
-    }
+    const videoFile = params.get('v') || 'video1.mp4';
+    
+    const player = document.getElementById('mainPlayer');
+    const source = document.getElementById('videoSource');
+
+    source.src = videoFile;
+    player.load();
   </script>
 
 </body>
