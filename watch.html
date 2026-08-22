@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YT 2 - Player</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background-color: #0f0f0f; color: #fff; }
+
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 16px; height: 56px; background: #0f0f0f; border-bottom: 1px solid #272727;
+    }
+    .logo { font-size: 20px; font-weight: bold; color: #ff0000; text-decoration: none; }
+    .logo span { color: #fff; }
+
+    .watch-container {
+      max-width: 1280px; margin: 20px auto; padding: 0 16px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .player-box {
+      width: 100%; aspect-ratio: 16 / 9; background: #000;
+      border-radius: 12px; overflow: hidden;
+    }
+    video { width: 100%; height: 100%; outline: none; }
+    
+    .video-details { display: flex; flex-direction: column; gap: 12px; }
+    .title { font-size: 20px; font-weight: bold; }
+    .channel-row { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; }
+    .channel-name { font-weight: bold; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <a href="index.html" class="logo">YT <span>2</span></a>
+  </header>
+
+  <div class="watch-container">
+    <div class="player-box">
+      <video id="mainPlayer" controls autoplay>
+        <source id="videoSource" src="video1.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <div class="video-details">
+      <h1 class="title">Rec Room edit (lucy~) - Final Farewell</h1>
+      <div class="channel-row">
+        <img class="avatar" src="https://yt3.googleusercontent.com/O9ACW-aeAp4jVBBq6M2dVgRu-BMNpsOjAH-3gq29fuK-jl3Q-DscuJVz2n30CBfiiMWZhhzl0EQ=s160-c-k-c0x00ffffff-no-rj" alt="Profile">
+        <span class="channel-name">Thumblicker</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // URL parameter parsing so you can pass ?v=yourfile.mp4 dynamically
+    const params = new URLSearchParams(window.location.search);
+    const videoFile = params.get('v');
+    if (videoFile) {
+      const player = document.getElementById('mainPlayer');
+      const source = document.getElementById('videoSource');
+      source.src = videoFile;
+      player.load();
+    }
+  </script>
+
+</body>
+</html>
