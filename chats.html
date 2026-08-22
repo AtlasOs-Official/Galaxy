@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RealChat</title>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'gg sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+
+    :root {
+      --bg-servers: #1e1f22;
+      --bg-sidebar: #2b2d31;
+      --bg-chat: #313338;
+      --bg-message-hover: #2e3035;
+      --bg-input: #383a40;
+      --bg-userlist: #2b2d31;
+      --text-normal: #dbdee1;
+      --text-muted: #949ba4;
+      --text-heading: #f2f3f5;
+      --blurple: #5865f2;
+      --blurple-hover: #4752c4;
+      --green: #23a55a;
+      --red: #f23f43;
+    }
+
+    body {
+      display: flex;
+      height: 100vh;
+      background-color: var(--bg-chat);
+      color: var(--text-normal);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Start / Connect Modal */
+    .start-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .start-card {
+      background-color: var(--bg-sidebar);
+      padding: 32px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .start-card h1 {
+      color: var(--text-heading);
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+
+    .start-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    /* Mode Selector Toggle */
+    .mode-selector {
+      display: flex;
+      background: var(--bg-servers);
+      padding: 4px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      gap: 4px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      background: var(--blurple);
+      color: white;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .start-input {
+      flex: 1;
+      background-color: var(--bg-input);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px;
+      border-radius: 6px;
+      color: var(--text-normal);
+      font-size: 15px;
+      outline: none;
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-input);
+      color: var(--text-heading);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .start-btn {
+      background-color: var(--blurple);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    .start-btn:hover {
+      background-color: var(--blurple-hover);
+    }
+
+    /* Main Layout */
+    .server-rail {
+      width: 72px;
+      background-color: var(--bg-servers);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+    }
+
+    .server-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background-color: var(--blurple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-heading);
+      font-weight: bold;
+    }
+
+    .sidebar {
+      width: 240px;
+      background-color: var(--bg-sidebar);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .server-header {
+      height: 48px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+      color: var(--text-heading);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    }
+
+    .channel-list {
+      padding: 16px 8px;
+      flex: 1;
+    }
+
+    .channel-category {
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      padding-left: 8px;
+    }
+
+    .channel-item {
+      display: flex;
+      align-items: center;
+      padding: 6px 8px;
+      border-radius: 4px;
+      color: var(--text-normal);
+      background-color: rgba(255, 255, 255, 0.07);
+      gap: 6px;
+    }
+
+    .user-profile-bar {
+      height: 52px;
+      background-color: #232428;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      gap: 8px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--blurple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .user-info .username {
+      color: var(--text-heading);
+      font-weight: bold;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .user-info .status-text {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .leave-btn {
+      background-color: transparent;
+      color: var(--text-muted);
+      border: none;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .leave-btn:hover {
+      background-color: var(--red);
+      color: white;
+    }
+
+    /* Chat Window */
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-chat);
+    }
+
+    .chat-header {
+      height: 48px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+      color: var(--text-heading);
+      font-weight: bold;
+    }
+
+    .messages-area {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message {
+      display: flex;
+      gap: 16px;
+    }
+
+    .message:hover {
+      background-color: var(--bg-message-hover);
+      margin: 0 -16px;
+      padding: 2px 16px;
+      border-radius: 4px;
+    }
+
+    .message-header {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .author {
+      color: var(--text-heading);
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .timestamp {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .text {
+      color: var(--text-normal);
+      font-size: 14px;
+      margin-top: 4px;
+      word-break: break-word;
+    }
+
+    .text a {
+      color: #00a8fc;
+      text-decoration: none;
+    }
+
+    .text a:hover {
+      text-decoration: underline;
+    }
+
+    /* File / Media Attachments */
+    .chat-media {
+      margin-top: 8px;
+      max-width: 400px;
+      max-height: 300px;
+      border-radius: 8px;
+      display: block;
+      object-fit: contain;
+      background-color: #000;
+    }
+
+    .file-attachment {
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background-color: var(--bg-sidebar);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px;
+      border-radius: 8px;
+      max-width: 400px;
+    }
+
+    .file-attachment .file-icon {
+      font-size: 24px;
+    }
+
+    .file-attachment .file-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .file-attachment .file-name {
+      color: #00a8fc;
+      font-size: 14px;
+      font-weight: bold;
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-attachment .file-name:hover {
+      text-decoration: underline;
+    }
+
+    .file-attachment .file-size {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .input-area {
+      padding: 0 16px 24px 16px;
+    }
+
+    .input-wrapper {
+      background-color: var(--bg-input);
+      border-radius: 8px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-wrapper input[type="text"] {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-normal);
+      font-size: 15px;
+    }
+
+    .upload-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .upload-btn:hover {
+      color: var(--text-heading);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .user-list {
+      width: 240px;
+      background-color: var(--bg-userlist);
+      padding: 16px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 8px;
+      border-radius: 4px;
+    }
+
+    .user-item .name {
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .connection-status {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.3);
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Modal Overlay -->
+  <div class="start-overlay" id="start-overlay">
+    <div class="start-card">
+      <h1>🎮 RealChat</h1>
+      <p>Choose your username and connection mode.</p>
+      
+      <div class="mode-selector">
+        <button class="mode-btn active" id="btn-mode-server" type="button">🌐 Named Server</button>
+        <button class="mode-btn" id="btn-mode-private" type="button">🔒 Private Code</button>
+        <button class="mode-btn" id="btn-mode-join" type="button">🔗 Join Existing</button>
+      </div>
+
+      <div class="form-group">
+        <div class="input-group">
+          <input type="text" id="username-input" class="start-input" placeholder="Your username..." maxlength="18" />
+          <button type="button" class="btn-secondary" id="random-btn">🎲</button>
+        </div>
+        <input type="text" id="target-input" class="start-input" placeholder="Server Name (e.g. recside)" />
+      </div>
+
+      <button type="button" class="start-btn" id="action-btn">▶ Host Server</button>
+    </div>
+  </div>
+
+  <div class="server-rail">
+    <div class="server-icon" id="server-badge">RC</div>
+  </div>
+
+  <div class="sidebar">
+    <div class="server-header" id="server-title">RealChat</div>
+    <div class="channel-list">
+      <div class="channel-category">Text Channels</div>
+      <div class="channel-item"># global-chat</div>
+    </div>
+    
+    <div class="user-profile-bar">
+      <div class="avatar" id="my-profile-avatar">?</div>
+      <div class="user-info">
+        <span class="username" id="my-username">Offline</span>
+        <span class="status-text" id="my-room-code">No Server</span>
+      </div>
+      <button type="button" class="leave-btn" id="leave-btn" title="Leave Chat">🚪 Leave</button>
+    </div>
+  </div>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <span># global-chat</span>
+      <span class="connection-status" id="conn-status">Disconnected</span>
+    </div>
+
+    <div class="messages-area" id="messages-area">
+      <div class="message">
+        <div class="avatar" style="background-color: #5865f2;">RC</div>
+        <div class="message-content">
+          <div class="message-header">
+            <span class="author">System</span>
+            <span class="timestamp">Live</span>
+          </div>
+          <div class="text">Welcome! Type <b>/clear</b> in chat to clear your messages (10s cooldown).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <form id="chat-form" class="input-wrapper">
+        <input type="file" id="media-input" style="display: none;" />
+        <button type="button" class="upload-btn" id="file-btn" title="Upload Any File" disabled>📁</button>
+        <input type="text" id="message-input" placeholder="Connect to chat..." autocomplete="off" disabled />
+      </form>
+    </div>
+  </div>
+
+  <div class="user-list">
+    <div class="channel-category" id="online-count">Online Users — 0</div>
+    <div id="users-container"></div>
+  </div>
+
+  <script>
+    const startOverlay = document.getElementById('start-overlay');
+    const usernameInput = document.getElementById('username-input');
+    const targetInput = document.getElementById('target-input');
+    const randomBtn = document.getElementById('random-btn');
+    const actionBtn = document.getElementById('action-btn');
+
+    const btnModeServer = document.getElementById('btn-mode-server');
+    const btnModePrivate = document.getElementById('btn-mode-private');
+    const btnModeJoin = document.getElementById('btn-mode-join');
+
+    const messagesArea = document.getElementById('messages-area');
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const mediaInput = document.getElementById('media-input');
+    const fileBtn = document.getElementById('file-btn');
+    const leaveBtn = document.getElementById('leave-btn');
+
+    const myUsernameEl = document.getElementById('my-username');
+    const myProfileAvatar = document.getElementById('my-profile-avatar');
+    const myRoomCodeEl = document.getElementById('my-room-code');
+    const connStatusEl = document.getElementById('conn-status');
+    const onlineCountEl = document.getElementById('online-count');
+    const usersContainer = document.getElementById('users-container');
+    const serverBadge = document.getElementById('server-badge');
+    const serverTitle = document.getElementById('server-title');
+
+    let currentMode = 'server'; // 'server', 'private', or 'join'
+    let peer = null;
+    let isHost = false;
+    let connections = [];
+    let onlineUsers = new Map();
+    let currentUser = null;
+
+    let lastClearTime = 0;
+    const CLEAR_COOLDOWN_MS = 10000;
+
+    function generateRandomName() {
+      const prefixes = ['Cool', 'Cyber', 'Neon', 'Shadow', 'Fast', 'Pixel', 'Astro', 'Cosmic'];
+      const nouns = ['Gamer', 'Knight', 'Ninja', 'Runner', 'Coder', 'Pilot', 'Falcon', 'Viper'];
+      return `${prefixes[Math.floor(Math.random() * prefixes.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}_${Math.floor(100 + Math.random() * 900)}`;
+    }
+
+    function stringToColor(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      return `hsl(${Math.abs(hash) % 360}, 65%, 50%)`;
+    }
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function isImageURL(url) {
+      return (url.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i) != null) || url.startsWith('data:image/');
+    }
+
+    function isVideoURL(url) {
+      return (url.match(/\.(mp4|webm|ogg|mov|m4v)$/i) != null) || url.startsWith('data:video/');
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag)
+      );
+    }
+
+    function parseTextWithLinks(text) {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const imageUrls = [];
+      const videoUrls = [];
+
+      const htmlContent = escapeHTML(text).replace(urlRegex, (url) => {
+        if (isImageURL(url)) {
+          imageUrls.push(url);
+        } else if (isVideoURL(url)) {
+          videoUrls.push(url);
+        }
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+      });
+
+      return { htmlContent, imageUrls, videoUrls };
+    }
+
+    usernameInput.value = generateRandomName();
+    randomBtn.addEventListener('click', () => usernameInput.value = generateRandomName());
+
+    // File selection trigger
+    fileBtn.addEventListener('click', () => mediaInput.click());
+
+    // Leave Chat Handler
+    leaveBtn.addEventListener('click', leaveChat);
+
+    function leaveChat() {
+      if (currentUser) {
+        broadcastData({
+          type: 'leave',
+          userId: currentUser.id
+        });
+      }
+
+      connections.forEach(conn => conn.close());
+      connections = [];
+
+      if (peer) {
+        peer.destroy();
+        peer = null;
+      }
+
+      onlineUsers.clear();
+      renderUserList();
+      currentUser = null;
+
+      connStatusEl.textContent = 'Disconnected';
+      connStatusEl.style.color = 'var(--text-muted)';
+      myUsernameEl.textContent = 'Offline';
+      myProfileAvatar.textContent = '?';
+      myProfileAvatar.style.backgroundColor = 'var(--blurple)';
+      myRoomCodeEl.textContent = 'No Server';
+      messageInput.disabled = true;
+      fileBtn.disabled = true;
+      messageInput.placeholder = "Connect to chat...";
+
+      serverBadge.textContent = 'RC';
+      serverTitle.textContent = 'RealChat';
+
+      messagesArea.innerHTML = `
+        <div class="message">
+          <div class="avatar" style="background-color: #5865f2;">RC</div>
+          <div class="message-content">
+            <div class="message-header">
+              <span class="author">System</span>
+              <span class="timestamp">Live</span>
+            </div>
+            <div class="text">Welcome! Type <b>/clear</b> in chat to clear your messages (10s cooldown).</div>
+          </div>
+        </div>
+      `;
+
+      startOverlay.style.display = 'flex';
+    }
+
+    // Mode Switcher Logic
+    btnModeServer.addEventListener('click', () => setMode('server'));
+    btnModePrivate.addEventListener('click', () => setMode('private'));
+    btnModeJoin.addEventListener('click', () => setMode('join'));
+
+    function setMode(mode) {
+      currentMode = mode;
+      [btnModeServer, btnModePrivate, btnModeJoin].forEach(b => b.classList.remove('active'));
+
+      if (mode === 'server') {
+        btnModeServer.classList.add('active');
+        targetInput.style.display = 'block';
+        targetInput.placeholder = 'Server Name (e.g. recside)';
+        actionBtn.textContent = '▶ Host Named Server';
+      } else if (mode === 'private') {
+        btnModePrivate.classList.add('active');
+        targetInput.style.display = 'none';
+        actionBtn.textContent = '▶ Host Private Room';
+      } else if (mode === 'join') {
+        btnModeJoin.classList.add('active');
+        targetInput.style.display = 'block';
+        targetInput.placeholder = 'Enter Code or Server Name';
+        actionBtn.textContent = '▶ Join Chat';
+      }
+    }
+
+    actionBtn.addEventListener('click', () => {
+      const name = usernameInput.value.trim() || generateRandomName();
+      let rawTarget = targetInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+
+      currentUser = {
+        id: 'usr_' + Math.random().toString(36).substring(2, 9),
+        name: name,
+        color: stringToColor(name)
+      };
+
+      myUsernameEl.textContent = currentUser.name;
+      myProfileAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+      myProfileAvatar.style.backgroundColor = currentUser.color;
+
+      startOverlay.style.display = 'none';
+      connStatusEl.textContent = 'Connecting...';
+
+      let fullCode = '';
+
+      if (currentMode === 'server') {
+        isHost = true;
+        rawTarget = rawTarget || 'lobby';
+        fullCode = `rc-${rawTarget}`;
+        initHost(fullCode, rawTarget);
+      } 
+      else if (currentMode === 'private') {
+        isHost = true;
+        const randomCode = Math.floor(1000 + Math.random() * 9000);
+        fullCode = `rc-${randomCode}`;
+        initHost(fullCode, `Private ${randomCode}`);
+      } 
+      else if (currentMode === 'join') {
+        isHost = false;
+        if (!rawTarget.startsWith('rc-')) {
+          fullCode = `rc-${rawTarget}`;
+        } else {
+          fullCode = rawTarget;
+        }
+
+        serverBadge.textContent = 'RC';
+        serverTitle.textContent = 'RealChat';
+
+        peer = new Peer();
+        peer.on('open', () => {
+          const conn = peer.connect(fullCode);
+          bindConnection(conn);
+          myRoomCodeEl.textContent = `Code: ${fullCode}`;
+        });
+
+        peer.on('error', () => {
+          connStatusEl.textContent = 'Connection Error';
+          connStatusEl.style.color = 'var(--red)';
+          appendMessage('System', 'Could not connect to that code or server name.', 'var(--red)');
+        });
+      }
+    });
+
+    function initHost(code, titleDisplay) {
+      serverBadge.textContent = titleDisplay.substring(0, 2).toUpperCase();
+      serverTitle.textContent = titleDisplay;
+
+      peer = new Peer(code);
+
+      peer.on('open', (id) => {
+        setConnectedUI(id);
+        addUser(currentUser);
+      });
+
+      peer.on('connection', (conn) => {
+        bindConnection(conn);
+      });
+
+      peer.on('error', (err) => {
+        if (err.type === 'unavailable-id') {
+          connStatusEl.textContent = 'Name Taken';
+          connStatusEl.style.color = 'var(--red)';
+          appendMessage('System', 'That server name is already being hosted. Try joining it instead!', 'var(--red)');
+        } else {
+          connStatusEl.textContent = 'Error';
+          connStatusEl.style.color = 'var(--red)';
+        }
+      });
+    }
+
+    function setConnectedUI(code) {
+      connStatusEl.textContent = isHost ? 'Hosting Live' : 'Connected';
+      connStatusEl.style.color = 'var(--green)';
+      myRoomCodeEl.textContent = `Code: ${code}`;
+      messageInput.disabled = false;
+      fileBtn.disabled = false;
+      messageInput.placeholder = "Message #global-chat (or type /clear)";
+      
+      if (isHost) {
+        appendMessage('System', `Room live! Share join code: ${code}`, '#5865f2');
+      }
+    }
+
+    function bindConnection(conn) {
+      connections.push(conn);
+
+      conn.on('open', () => {
+        if (!isHost) setConnectedUI(conn.peer);
+        
+        conn.send({
+          type: 'join',
+          user: currentUser
+        });
+      });
+
+      conn.on('data', (data) => {
+        handleIncomingData(data, conn);
+      });
+
+      conn.on('close', () => {
+        connections = connections.filter(c => c !== conn);
+      });
+    }
+
+    function handleIncomingData(data, sourceConn) {
+      if (data.type === 'join') {
+        addUser(data.user);
+        
+        if (isHost) {
+          const userList = Array.from(onlineUsers.values());
+          broadcastData({ type: 'user-list', list: userList });
+        }
+      } 
+      else if (data.type === 'leave') {
+        removeUser(data.userId);
+
+        if (isHost) {
+          broadcastData(data, sourceConn);
+        }
+      }
+      else if (data.type === 'user-list') {
+        onlineUsers.clear();
+        data.list.forEach(u => addUser(u));
+      } 
+      else if (data.type === 'message') {
+        appendMessage(data.sender, data.text, data.color, data.media);
+        
+        if (isHost) {
+          broadcastData(data, sourceConn);
+        }
+      }
+    }
+
+    function broadcastData(data, excludeConn = null) {
+      connections.forEach(conn => {
+        if (conn !== excludeConn && conn.open) {
+          conn.send(data);
+        }
+      });
+    }
+
+    function addUser(user) {
+      onlineUsers.set(user.id, user);
+      renderUserList();
+    }
+
+    function removeUser(userId) {
+      onlineUsers.delete(userId);
+      renderUserList();
+    }
+
+    function renderUserList() {
+      usersContainer.innerHTML = '';
+      onlineCountEl.textContent = `Online Users — ${onlineUsers.size}`;
+
+      onlineUsers.forEach(u => {
+        const userDiv = document.createElement('div');
+        userDiv.className = 'user-item';
+        userDiv.innerHTML = `
+          <div class="avatar" style="background-color: ${u.color};">
+            ${u.name.charAt(0).toUpperCase()}
+          </div>
+          <span class="name">${u.name}</span>
+        `;
+        usersContainer.appendChild(userDiv);
+      });
+    }
+
+    // File Upload Handler (Any File)
+    mediaInput.addEventListener('change', () => {
+      const file = mediaInput.files[0];
+      if (!file || !currentUser) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        let fileCategory = 'other';
+        if (file.type.startsWith('image/')) fileCategory = 'image';
+        else if (file.type.startsWith('video/')) fileCategory = 'video';
+
+        const fileData = {
+          category: fileCategory,
+          name: file.name,
+          size: formatBytes(file.size),
+          src: e.target.result
+        };
+
+        const msgData = {
+          type: 'message',
+          sender: currentUser.name,
+          text: messageInput.value.trim(),
+          color: currentUser.color,
+          media: fileData
+        };
+
+        appendMessage(currentUser.name, msgData.text, currentUser.color, fileData);
+        broadcastData(msgData);
+
+        messageInput.value = '';
+        mediaInput.value = '';
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = messageInput.value.trim();
+
+      if (!text || !currentUser) return;
+
+      if (text === '/clear') {
+        const now = Date.now();
+        const timePassed = now - lastClearTime;
+
+        if (timePassed < CLEAR_COOLDOWN_MS) {
+          const remainingSecs = Math.ceil((CLEAR_COOLDOWN_MS - timePassed) / 1000);
+          appendMessage('System', `Please wait ${remainingSecs}s before using /clear again.`, 'var(--red)');
+        } else {
+          lastClearTime = now;
+          messagesArea.innerHTML = '';
+          appendMessage('System', 'Chat cleared!', '#5865f2');
+        }
+
+        messageInput.value = '';
+        return;
+      }
+
+      const msgData = {
+        type: 'message',
+        sender: currentUser.name,
+        text: text,
+        color: currentUser.color
+      };
+
+      appendMessage(currentUser.name, text, currentUser.color);
+      broadcastData(msgData);
+      messageInput.value = '';
+    });
+
+    function appendMessage(sender, text, color, media = null) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message';
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      messageDiv.innerHTML = `
+        <div class="avatar" style="background-color: ${color || '#5865f2'};">
+          ${sender.charAt(0).toUpperCase()}
+        </div>
+        <div class="message-content">
+          <div class="message-header">
+            <span class="author">${sender}</span>
+            <span class="timestamp">${time}</span>
+          </div>
+          <div class="text"></div>
+          <div class="media-container"></div>
+        </div>
+      `;
+
+      const textEl = messageDiv.querySelector('.text');
+      const mediaContainer = messageDiv.querySelector('.media-container');
+
+      if (text) {
+        const parsed = parseTextWithLinks(text);
+        textEl.innerHTML = parsed.htmlContent;
+
+        // Embed image URLs detected in text
+        parsed.imageUrls.forEach(url => {
+          const img = document.createElement('img');
+          img.src = url;
+          img.className = 'chat-media';
+          img.onerror = () => img.remove();
+          mediaContainer.appendChild(img);
+        });
+
+        // Embed video URLs detected in text
+        parsed.videoUrls.forEach(url => {
+          const video = document.createElement('video');
+          video.src = url;
+          video.controls = true;
+          video.className = 'chat-media';
+          video.onerror = () => video.remove();
+          mediaContainer.appendChild(video);
+        });
+      } else {
+        textEl.style.display = 'none';
+      }
+
+      if (media) {
+        if (media.category === 'image') {
+          const img = document.createElement('img');
+          img.src = media.src;
+          img.className = 'chat-media';
+          mediaContainer.appendChild(img);
+        } else if (media.category === 'video') {
+          const video = document.createElement('video');
+          video.src = media.src;
+          video.controls = true;
+          video.className = 'chat-media';
+          mediaContainer.appendChild(video);
+        } else {
+          const fileCard = document.createElement('div');
+          fileCard.className = 'file-attachment';
+          fileCard.innerHTML = `
+            <span class="file-icon">📄</span>
+            <div class="file-info">
+              <a class="file-name" href="${media.src}" download="${media.name}">${media.name}</a>
+              <span class="file-size">${media.size}</span>
+            </div>
+          `;
+          mediaContainer.appendChild(fileCard);
+        }
+      }
+
+      messagesArea.appendChild(messageDiv);
+      messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+  </script>
+</body>
+</html>
