@@ -8,12 +8,63 @@
     :root {
       --galaxy-accent: #9d4edd;
       --galaxy-glow: #7b2cbf;
+      --bg-gradient: radial-gradient(circle at center, #240046 0%, #10002b 60%, #03001e 100%);
       --mint-dark: #1a1829;
       --mint-light-dark: #242038;
       --mint-panel: #121020;
       --text-color: #e0aaff;
       --text-main: #f8f7ff;
       --border-color: #3c096c;
+      --window-shadow: 0 8px 25px rgba(0,0,0,0.8);
+      --glass-backdrop: none;
+      --glass-border: 1px solid var(--border-color);
+      --glass-inner-shadow: none;
+      --aero-opacity: 0.15;
+      --aero-blur: 16px;
+    }
+
+    /* Light Theme Overrides */
+    body.theme-light {
+      --galaxy-accent: #7b2cbf;
+      --galaxy-glow: #9d4edd;
+      --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+      --mint-dark: #f0f2f5;
+      --mint-light-dark: #ffffff;
+      --mint-panel: #e4e7eb;
+      --text-color: #4a154b;
+      --text-main: #1d1c1d;
+      --border-color: #cbd5e1;
+      --window-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      --glass-backdrop: none;
+      --glass-border: 1px solid var(--border-color);
+      --glass-inner-shadow: none;
+    }
+
+    /* iOS-Style Ultra Liquid Glass Theme Overrides */
+    body.theme-glass {
+      --galaxy-accent: #007aff;
+      --galaxy-glow: #58a6ff;
+      --bg-gradient: radial-gradient(circle at 50% 30%, #1e3c72 0%, #2a5298 50%, #0f172a 100%);
+      --mint-dark: rgba(255, 255, 255, 0.18);
+      --mint-light-dark: rgba(255, 255, 255, 0.12);
+      --mint-panel: rgba(255, 255, 255, 0.22);
+      --text-color: #ffffff;
+      --text-main: #ffffff;
+      --border-color: rgba(255, 255, 255, 0.45);
+      --window-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+      --glass-backdrop: blur(25px) saturate(210%);
+      --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+      --glass-inner-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5), inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Clear Mode Sub-setting Overrides for Liquid Glass */
+    body.theme-glass.clear-mode {
+      --mint-dark: rgba(255, 255, 255, var(--aero-opacity));
+      --mint-light-dark: rgba(255, 255, 255, var(--aero-opacity));
+      --mint-panel: rgba(255, 255, 255, var(--aero-opacity));
+      --glass-backdrop: blur(var(--aero-blur)) saturate(180%);
+      --glass-border: 1px solid rgba(255, 255, 255, calc(var(--aero-opacity) + 0.15));
+      --window-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     }
 
     * {
@@ -24,19 +75,19 @@
     }
 
     body {
-      font-family: 'Ubuntu', 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       height: 100vh;
       overflow: hidden;
-      background: radial-gradient(circle at center, #240046 0%, #10002b 60%, #03001e 100%);
+      background: var(--bg-gradient);
       color: var(--text-main);
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
-    /* Helper class to hide uninstalled apps */
     .installed-app {
       display: none !important;
     }
 
-    /* Main OS Layout */
+    /* Desktop Layout */
     #desktop {
       height: calc(100vh - 40px);
       width: 100vw;
@@ -56,40 +107,55 @@
       align-items: center;
       text-align: center;
       padding: 8px;
-      border-radius: 6px;
+      border-radius: 14px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s ease;
+    }
+
+    body.theme-glass .shortcut {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: var(--glass-backdrop);
+      -webkit-backdrop-filter: var(--glass-backdrop);
+      border: var(--glass-border);
+      box-shadow: var(--glass-inner-shadow);
     }
 
     .shortcut:hover {
-      background: rgba(157, 78, 221, 0.25);
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
     }
 
     .shortcut-icon {
       font-size: 32px;
       margin-bottom: 5px;
-      filter: drop-shadow(0 0 5px rgba(157, 78, 221, 0.6));
     }
 
     .shortcut-label {
       font-size: 12px;
       color: var(--text-main);
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      font-weight: 500;
     }
 
-    /* Bottom Panel */
+    /* Taskbar / Panel */
     #panel {
-      height: 40px;
-      width: 100vw;
+      height: 48px;
+      width: calc(100vw - 30px);
+      margin: 0 auto 8px auto;
       background-color: var(--mint-panel);
+      backdrop-filter: var(--glass-backdrop);
+      -webkit-backdrop-filter: var(--glass-backdrop);
       position: fixed;
       bottom: 0;
-      left: 0;
+      left: 15px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-top: 1px solid var(--border-color);
+      border: var(--glass-border);
+      box-shadow: var(--window-shadow);
+      border-radius: 24px;
       z-index: 9999;
+      transition: background-color 0.1s ease, backdrop-filter 0.3s ease;
     }
 
     .panel-left, .panel-right {
@@ -101,36 +167,35 @@
     #start-btn {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 0 15px;
+      gap: 8px;
+      padding: 0 16px;
       height: 100%;
       background: transparent;
       border: none;
       color: var(--text-main);
-      font-weight: bold;
+      font-weight: 600;
       cursor: pointer;
+      border-radius: 24px 0 0 24px;
     }
 
     #start-btn:hover {
-      background-color: rgba(157, 78, 221, 0.2);
+      background-color: rgba(255, 255, 255, 0.15);
     }
 
-    /* Enhanced Planet Vector Start Logo */
     .galaxy-logo-svg {
       width: 24px;
       height: 24px;
-      filter: drop-shadow(0 0 6px #c77dff);
-      transition: transform 0.2s ease, filter 0.2s ease;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.6));
+      transition: transform 0.2s ease;
     }
 
     #start-btn:hover .galaxy-logo-svg {
-      transform: scale(1.15) rotate(10deg);
-      filter: drop-shadow(0 0 10px #ff9e00);
+      transform: scale(1.1);
     }
 
     #tasks-container {
       display: flex;
-      gap: 4px;
+      gap: 6px;
       height: 100%;
       align-items: center;
     }
@@ -139,11 +204,12 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 0 12px;
+      padding: 0 14px;
       height: 32px;
       background-color: var(--mint-light-dark);
-      border-bottom: 2px solid var(--galaxy-accent);
-      border-radius: 4px 4px 0 0;
+      border: var(--glass-border);
+      box-shadow: var(--glass-inner-shadow);
+      border-radius: 16px;
       font-size: 12px;
       max-width: 150px;
       cursor: pointer;
@@ -151,40 +217,45 @@
     }
 
     .tray-clock {
-      padding: 0 15px;
+      padding: 0 18px;
       font-size: 13px;
+      font-weight: 600;
       color: var(--text-color);
     }
 
     /* Start Menu */
     #start-menu {
       position: fixed;
-      bottom: 40px;
-      left: 0;
+      bottom: 64px;
+      left: 15px;
       width: 320px;
-      height: 360px;
+      height: 380px;
       background-color: var(--mint-dark);
-      border: 1px solid var(--border-color);
-      border-bottom: none;
-      border-radius: 0 8px 0 0;
+      backdrop-filter: var(--glass-backdrop);
+      -webkit-backdrop-filter: var(--glass-backdrop);
+      border: var(--glass-border);
+      box-shadow: var(--window-shadow);
+      border-radius: 20px;
       display: none;
       flex-direction: column;
       z-index: 9998;
+      overflow: hidden;
+      transition: background-color 0.1s ease;
     }
 
     .menu-header {
-      padding: 12px;
+      padding: 14px;
       background: var(--mint-panel);
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: var(--glass-border);
     }
 
     .menu-header input {
       width: 100%;
-      padding: 8px 12px;
+      padding: 8px 14px;
       background: var(--mint-light-dark);
-      border: 1px solid var(--border-color);
+      border: var(--glass-border);
       color: var(--text-main);
-      border-radius: 4px;
+      border-radius: 12px;
       outline: none;
     }
 
@@ -192,7 +263,7 @@
       padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
       overflow-y: auto;
     }
 
@@ -200,16 +271,15 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 12px;
-      border-radius: 4px;
+      padding: 10px 14px;
+      border-radius: 12px;
       cursor: pointer;
       font-size: 13px;
       color: var(--text-main);
     }
 
     .menu-item:hover {
-      background-color: var(--galaxy-accent);
-      color: #fff;
+      background-color: rgba(255, 255, 255, 0.25);
     }
 
     /* Window Elements */
@@ -218,58 +288,54 @@
       top: 80px;
       left: 150px;
       width: 580px;
-      height: 420px;
+      height: 440px;
       background-color: var(--mint-dark);
-      border: 1px solid var(--border-color);
-      border-radius: 8px 8px 0 0;
+      backdrop-filter: var(--glass-backdrop);
+      -webkit-backdrop-filter: var(--glass-backdrop);
+      border: var(--glass-border);
+      box-shadow: var(--window-shadow);
+      border-radius: 20px;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.8);
       z-index: 10;
+      overflow: hidden;
+      transition: background-color 0.1s ease, border-color 0.1s ease;
     }
 
     .window.resizing-or-maximizing {
-      transition: top 0.15s ease, left 0.15s ease, width 0.15s ease, height 0.15s ease;
-    }
-
-    .window.is-dragging {
-      will-change: top, left;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .window.maximized {
       top: 0 !important;
       left: 0 !important;
       width: 100vw !important;
-      height: calc(100vh - 40px) !important;
+      height: calc(100vh - 60px) !important;
       border-radius: 0 !important;
     }
 
     .window-header {
-      height: 34px;
+      height: 40px;
       background-color: var(--mint-panel);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 12px;
-      border-radius: 7px 7px 0 0;
+      padding: 0 16px;
       cursor: move;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .window.maximized .window-header {
-      border-radius: 0;
-      cursor: default;
+      border-bottom: var(--glass-border);
+      transition: background-color 0.1s ease;
     }
 
     .window-title {
       font-size: 13px;
-      font-weight: bold;
+      font-weight: 600;
       color: var(--text-color);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     }
 
     .window-controls {
       display: flex;
-      gap: 6px;
+      gap: 8px;
     }
 
     .win-btn {
@@ -278,12 +344,12 @@
       border-radius: 50%;
       border: none;
       cursor: pointer;
-      font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 10px;
-      color: #000;
+      color: rgba(0,0,0,0.6);
+      font-weight: bold;
     }
 
     .win-close { background-color: #ff5f56; }
@@ -296,56 +362,332 @@
       flex-direction: column;
     }
 
-    /* App Styles */
+    /* Settings UI */
+    .settings-container {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      color: var(--text-main);
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .settings-section {
+      background: var(--mint-light-dark);
+      border: var(--glass-border);
+      box-shadow: var(--glass-inner-shadow);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .settings-section h3 {
+      font-size: 15px;
+      margin-bottom: 12px;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .theme-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+    }
+
+    .theme-card {
+      border: var(--glass-border);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--mint-panel);
+      position: relative;
+    }
+
+    .theme-card:hover:not(.locked) {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .theme-card.active {
+      border-color: #fff;
+      background: rgba(255, 255, 255, 0.35);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.4), var(--glass-inner-shadow);
+    }
+
+    .theme-card.locked {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .theme-card-icon {
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+
+    .theme-card-title {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Aero Sub-setting toggle & Slider */
+    .aero-toggle-wrapper {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: opacity 0.3s ease;
+    }
+
+    .aero-toggle-wrapper.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .aero-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .aero-slider-container {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: var(--glass-border);
+    }
+
+    .aero-slider-container.active {
+      display: flex;
+    }
+
+    .aero-slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .aero-range-input {
+      width: 100%;
+      accent-color: var(--galaxy-accent);
+      cursor: pointer;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.2);
+      transition: .3s;
+      border-radius: 24px;
+      border: var(--glass-border);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--galaxy-accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Installer App & Multi-step Wizard */
     .installer-window {
-      padding: 30px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       text-align: center;
       height: 100%;
     }
 
+    .installer-step {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .installer-step.active {
+      display: flex;
+    }
+
+    .installer-btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
     .installer-btn {
-      margin-top: 20px;
-      background: var(--galaxy-accent);
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: var(--glass-backdrop);
+      border: var(--glass-border);
+      box-shadow: var(--glass-inner-shadow);
       color: #fff;
-      border: none;
       padding: 10px 22px;
-      font-size: 15px;
-      font-weight: bold;
-      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 18px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s ease;
     }
 
     .installer-btn:hover {
-      background: var(--galaxy-glow);
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(1.03);
+    }
+
+    .installer-btn.btn-primary {
+      background: linear-gradient(135deg, #7b2cbf, #9d4edd);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .installer-btn.btn-primary:hover {
+      background: linear-gradient(135deg, #9d4edd, #c77dff);
+    }
+
+    .installer-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Galaxy+ Banner Offer */
+    .galaxy-plus-card {
+      background: linear-gradient(135deg, rgba(157, 78, 221, 0.3), rgba(0, 122, 255, 0.3));
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 16px;
+      padding: 16px;
+      margin: 12px 0;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .galaxy-plus-badge {
+      display: inline-block;
+      background: linear-gradient(90deg, #ff007f, #7928ca);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    /* Speed Tiers Grid */
+    .speed-options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 420px;
+      margin-top: 10px;
+    }
+
+    .speed-card {
+      background: var(--mint-light-dark);
+      border: var(--glass-border);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .speed-card:hover:not(.locked) {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .speed-card.selected {
+      border-color: var(--galaxy-accent);
+      background: rgba(157, 78, 221, 0.25);
+      box-shadow: 0 0 10px rgba(157, 78, 221, 0.4);
+    }
+
+    .speed-card.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .speed-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .speed-card.locked .speed-tag {
+      background: rgba(255, 0, 80, 0.3);
+      color: #ff80a0;
+      font-weight: bold;
     }
 
     .progress-bar-container {
       width: 100%;
+      max-width: 420px;
       height: 12px;
       background: var(--mint-panel);
-      border-radius: 6px;
+      border-radius: 10px;
       overflow: hidden;
       margin-top: 20px;
       display: none;
-      border: 1px solid var(--border-color);
+      border: var(--glass-border);
     }
 
     .progress-bar {
       width: 0%;
       height: 100%;
-      background: linear-gradient(90deg, #7b2cbf, #ff9e00);
+      background: linear-gradient(90deg, #38ef7d, #11998e);
       transition: width 0.1s linear;
     }
 
     .terminal-body {
-      background-color: #0c0a14;
-      color: #d8b4fe;
-      font-family: 'Consolas', 'Courier New', monospace;
+      background-color: rgba(12, 10, 20, 0.85);
+      color: #7dd3fc;
+      font-family: 'Consolas', monospace;
       font-size: 14px;
       padding: 15px;
       height: 100%;
@@ -354,18 +696,18 @@
     .browser-bar {
       display: flex;
       gap: 8px;
-      padding: 8px;
+      padding: 10px;
       background: var(--mint-panel);
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: var(--glass-border);
     }
 
     .browser-bar input {
       flex-grow: 1;
       padding: 6px 12px;
       background: var(--mint-light-dark);
-      border: 1px solid var(--border-color);
-      color: #fff;
-      border-radius: 4px;
+      border: var(--glass-border);
+      color: var(--text-main);
+      border-radius: 12px;
       outline: none;
     }
 
@@ -376,10 +718,6 @@
       background: #fff;
     }
 
-    .window.is-dragging .browser-frame {
-      pointer-events: none;
-    }
-
     .terminal-input-line {
       display: flex;
       gap: 8px;
@@ -388,7 +726,7 @@
     .terminal-input {
       background: transparent;
       border: none;
-      color: #d8b4fe;
+      color: #7dd3fc;
       font-family: inherit;
       font-size: inherit;
       flex-grow: 1;
@@ -399,19 +737,20 @@
     .appstore-container {
       padding: 20px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(170px, 170px));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 160px));
+      gap: 16px;
       overflow-y: auto;
       height: 100%;
       justify-content: center;
     }
 
     .app-card {
-      width: 170px;
-      height: 170px;
+      width: 160px;
+      height: 160px;
       background: var(--mint-light-dark);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
+      border: var(--glass-border);
+      box-shadow: var(--glass-inner-shadow);
+      border-radius: 20px;
       padding: 12px;
       display: flex;
       flex-direction: column;
@@ -421,53 +760,60 @@
     }
 
     .app-card-icon {
-      font-size: 34px;
+      font-size: 32px;
       margin-top: 4px;
     }
 
     .app-card-title {
-      font-weight: bold;
+      font-weight: 600;
       color: var(--text-main);
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .app-card-desc {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-color);
+      opacity: 0.9;
       line-height: 1.2;
     }
 
     .app-card-btn {
-      background: var(--galaxy-accent);
-      border: none;
+      background: rgba(255, 255, 255, 0.25);
+      border: var(--glass-border);
       color: white;
       padding: 6px 14px;
-      border-radius: 4px;
+      border-radius: 12px;
       cursor: pointer;
       font-size: 11px;
-      font-weight: bold;
+      font-weight: 600;
       width: 100%;
+      transition: background 0.2s;
+    }
+
+    .app-card-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
     }
 
     .app-card-btn:disabled {
-      background: #3c3452;
+      background: rgba(0, 0, 0, 0.2);
+      border: transparent;
       cursor: default;
     }
 
     .app-card-progress-container {
       width: 100%;
-      height: 8px;
+      height: 6px;
       background: var(--mint-panel);
-      border-radius: 4px;
+      border-radius: 6px;
       overflow: hidden;
       display: none;
-      border: 1px solid var(--border-color);
+      border: var(--glass-border);
     }
 
     .app-card-progress-bar {
       width: 0%;
       height: 100%;
-      background: linear-gradient(90deg, #7b2cbf, #ff9e00);
+      background: #007aff;
       transition: width 0.1s linear;
     }
 
@@ -478,13 +824,13 @@
       height: 100%;
       padding: 12px;
       gap: 10px;
-      background: #0d0a18;
+      background: var(--mint-dark);
       position: relative;
     }
 
     .file-runner-controls {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
       flex-wrap: wrap;
     }
@@ -493,52 +839,43 @@
     .file-runner-controls button, 
     .file-runner-btn-upload {
       background: var(--mint-light-dark);
-      border: 1px solid var(--border-color);
+      border: var(--glass-border);
       color: var(--text-main);
       padding: 6px 12px;
-      border-radius: 4px;
+      border-radius: 12px;
       outline: none;
       font-size: 12px;
     }
 
     .file-runner-btn-upload {
-      background: #3c096c;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 600;
       display: inline-flex;
       align-items: center;
       gap: 4px;
     }
 
-    .file-runner-btn-upload:hover {
-      background: var(--galaxy-accent);
-    }
-
     .file-runner-controls button.run-btn {
-      background: var(--galaxy-accent);
+      background: rgba(0, 122, 255, 0.6);
+      color: #fff;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 600;
     }
 
     .file-runner-controls button.fullscreen-btn {
-      background: #242038;
       cursor: pointer;
       margin-left: auto;
-    }
-
-    .file-runner-controls button.fullscreen-btn:hover {
-      background: #3c096c;
     }
 
     .file-runner-editor {
       flex-grow: 1;
       width: 100%;
-      background: #141024;
-      border: 1px solid var(--border-color);
-      color: #e0aaff;
+      background: var(--mint-light-dark);
+      border: var(--glass-border);
+      color: var(--text-color);
       font-family: 'Consolas', monospace;
       padding: 10px;
-      border-radius: 4px;
+      border-radius: 12px;
       outline: none;
       resize: none;
     }
@@ -547,8 +884,8 @@
       position: relative;
       height: 180px;
       background: #000;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
+      border: var(--glass-border);
+      border-radius: 12px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -570,11 +907,6 @@
       object-fit: contain;
     }
 
-    .file-runner-preview audio {
-      width: 80%;
-    }
-
-    /* Fullscreen mode inside the app window */
     .file-runner-container.fullscreen-preview .file-runner-controls,
     .file-runner-container.fullscreen-preview .file-runner-editor {
       display: none !important;
@@ -595,20 +927,15 @@
       position: absolute;
       top: 10px;
       right: 10px;
-      background: rgba(20, 16, 36, 0.85);
-      border: 1px solid var(--border-color);
+      background: rgba(0, 0, 0, 0.7);
+      border: var(--glass-border);
       color: var(--text-main);
       padding: 6px 12px;
-      border-radius: 4px;
+      border-radius: 10px;
       cursor: pointer;
       font-size: 11px;
       z-index: 101;
       display: none;
-      backdrop-filter: blur(4px);
-    }
-
-    .exit-fullscreen-btn:hover {
-      background: var(--galaxy-accent);
     }
 
     .file-runner-container.fullscreen-preview .exit-fullscreen-btn {
@@ -616,13 +943,20 @@
     }
   </style>
 </head>
-<body>
+<body class="theme-dark">
 
-  <!-- Desktop Icons -->
   <div id="desktop">
     <div class="shortcut" id="installer-shortcut" onclick="openInstaller()">
       <div class="shortcut-icon">💿</div>
-      <div class="shortcut-label">Install Galaxy OS</div>
+      <div class="shortcut-label">Install OS</div>
+    </div>
+    <div class="shortcut" onclick="openBuyGalaxyPlusApp()">
+      <div class="shortcut-icon">✨</div>
+      <div class="shortcut-label">Buy Galaxy+</div>
+    </div>
+    <div class="shortcut installed-app" onclick="openSettings()">
+      <div class="shortcut-icon">⚙️</div>
+      <div class="shortcut-label">Settings</div>
     </div>
     <div class="shortcut installed-app" onclick="openTerminal()">
       <div class="shortcut-icon">💻</div>
@@ -637,7 +971,7 @@
       <div class="shortcut-label">App Store</div>
     </div>
     <div class="shortcut installed-app file-runner-app" onclick="openFileRunner()">
-      <div class="shortcut-icon">⚙️</div>
+      <div class="shortcut-icon">📄</div>
       <div class="shortcut-label">File Runner</div>
     </div>
     <div class="shortcut installed-app realchat-app" onclick="openRealChat()">
@@ -650,7 +984,6 @@
     </div>
   </div>
 
-  <!-- Start Menu -->
   <div id="start-menu">
     <div class="menu-header">
       <input type="text" placeholder="Search Galaxy OS...">
@@ -658,6 +991,12 @@
     <div class="menu-items">
       <div class="menu-item" id="installer-menu-item" onclick="openInstaller(); toggleStartMenu();">
         <span>💿</span> Install Galaxy OS
+      </div>
+      <div class="menu-item" onclick="openBuyGalaxyPlusApp(); toggleStartMenu();">
+        <span>✨</span> Buy Galaxy+
+      </div>
+      <div class="menu-item installed-app" onclick="openSettings(); toggleStartMenu();">
+        <span>⚙️</span> Settings
       </div>
       <div class="menu-item installed-app" onclick="openTerminal(); toggleStartMenu();">
         <span>💻</span> Terminal
@@ -669,7 +1008,7 @@
         <span>🛍️</span> App Store
       </div>
       <div class="menu-item installed-app file-runner-app" onclick="openFileRunner(); toggleStartMenu();">
-        <span>⚙️</span> File Runner
+        <span>📄</span> File Runner
       </div>
       <div class="menu-item installed-app realchat-app" onclick="openRealChat(); toggleStartMenu();">
         <span>💬</span> RealChat
@@ -680,28 +1019,24 @@
     </div>
   </div>
 
-  <!-- Bottom Panel -->
   <div id="panel">
     <div class="panel-left">
       <button id="start-btn" onclick="toggleStartMenu()">
-        <!-- Galaxy Logo SVG -->
         <svg class="galaxy-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="50" cy="50" r="30" fill="url(#planetGradient)"/>
           <ellipse cx="50" cy="50" rx="46" ry="14" stroke="url(#ringGradient)" stroke-width="6" transform="rotate(-25 50 50)"/>
           <defs>
             <linearGradient id="planetGradient" x1="20" y1="20" x2="80" y2="80">
-              <stop offset="0%" stop-color="#ff9e00" />
-              <stop offset="50%" stop-color="#c77dff" />
-              <stop offset="100%" stop-color="#3c096c" />
+              <stop offset="0%" stop-color="#00c6ff" />
+              <stop offset="100%" stop-color="#007aff" />
             </linearGradient>
             <linearGradient id="ringGradient" x1="0" y1="0" x2="100" y2="0">
-              <stop offset="0%" stop-color="#e0aaff" stop-opacity="0.3" />
-              <stop offset="50%" stop-color="#ffffff" />
-              <stop offset="100%" stop-color="#9d4edd" stop-opacity="0.3" />
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8" />
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0.2" />
             </linearGradient>
           </defs>
         </svg>
-        <span>Galaxy OS</span>
+        <span>Galaxy</span>
       </button>
       <div id="tasks-container"></div>
     </div>
@@ -713,11 +1048,17 @@
   <script>
     let zIndexCounter = 100;
     let installerWin = null;
+    let currentTheme = 'dark';
+    let isClearMode = false;
+    let aeroTransparencyPercent = 80;
     let isFileRunnerInstalled = false;
     let isRealChatInstalled = false;
     let isYt2Installed = false;
 
-    // Live Clock
+    /* Global persistent Galaxy+ state and Speed Configurations */
+    let hasGalaxyPlus = false;
+    let selectedInstallSpeedMs = 30000;
+
     function updateClock() {
       const now = new Date();
       document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -725,7 +1066,6 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Start Menu Toggle
     function toggleStartMenu() {
       const menu = document.getElementById('start-menu');
       menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
@@ -739,7 +1079,72 @@
       }
     });
 
-    // Window Creation Logic
+    function setTheme(theme) {
+      if (theme === 'glass' && !hasGalaxyPlus) {
+        alert("Liquid Glass theme is a Galaxy+ exclusive! Please purchase Galaxy+ to unlock it.");
+        return;
+      }
+
+      currentTheme = theme;
+      applyThemeClasses();
+      
+      document.querySelectorAll('.theme-card').forEach(card => {
+        if (card.dataset.theme === theme) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
+
+      const aeroToggle = document.getElementById('aero-toggle-wrapper');
+      if (aeroToggle) {
+        if (theme === 'glass') {
+          aeroToggle.classList.remove('disabled');
+        } else {
+          aeroToggle.classList.add('disabled');
+        }
+      }
+    }
+
+    function toggleClearMode(enabled) {
+      isClearMode = enabled;
+      applyThemeClasses();
+
+      const sliderContainer = document.getElementById('aero-slider-box');
+      if (sliderContainer) {
+        if (enabled) {
+          sliderContainer.classList.add('active');
+        } else {
+          sliderContainer.classList.remove('active');
+        }
+      }
+    }
+
+    function updateAeroOpacity(transparencyPercent) {
+      aeroTransparencyPercent = parseInt(transparencyPercent, 10);
+      
+      let computedOpacity = 1 - (aeroTransparencyPercent / 200);
+      if (computedOpacity < 0) computedOpacity = 0;
+
+      let blurAmount = Math.max(0, 20 - Math.floor((aeroTransparencyPercent / 200) * 20));
+
+      document.documentElement.style.setProperty('--aero-opacity', computedOpacity);
+      document.documentElement.style.setProperty('--aero-blur', blurAmount + 'px');
+      
+      const valDisplay = document.getElementById('aero-opacity-val');
+      if (valDisplay) {
+        valDisplay.innerText = aeroTransparencyPercent + '%';
+      }
+    }
+
+    function applyThemeClasses() {
+      let classNames = `theme-${currentTheme}`;
+      if (currentTheme === 'glass' && isClearMode) {
+        classNames += ' clear-mode';
+      }
+      document.body.className = classNames;
+    }
+
     function createWindow(title, content, customClass = '') {
       const win = document.createElement('div');
       win.className = 'window';
@@ -752,7 +1157,7 @@
         <div class="window-header">
           <span class="window-title">${title}</span>
           <div class="window-controls">
-            <button class="win-btn win-max" onclick="toggleMaximize(this)" title="Maximize/Restore">+</button>
+            <button class="win-btn win-max" onclick="toggleMaximize(this)" title="Maximize/Restore"></button>
             <button class="win-btn win-close" onclick="closeWindow(this)" title="Close">×</button>
           </div>
         </div>
@@ -772,10 +1177,8 @@
       win.remove();
     }
 
-    // Toggle Window Fullscreen/Maximize
     function toggleMaximize(btn) {
       const win = btn.closest('.window');
-      
       win.classList.add('resizing-or-maximizing');
       
       if (!win.classList.contains('maximized')) {
@@ -785,20 +1188,17 @@
         win.dataset.prevHeight = win.style.height;
 
         win.classList.add('maximized');
-        btn.innerText = '❐';
       } else {
         win.classList.remove('maximized');
         win.style.top = win.dataset.prevTop || '80px';
         win.style.left = win.dataset.prevLeft || '150px';
         win.style.width = win.dataset.prevWidth || '580px';
         win.style.height = win.dataset.prevHeight || '420px';
-        btn.innerText = '+';
       }
 
-      setTimeout(() => win.classList.remove('resizing-or-maximizing'), 150);
+      setTimeout(() => win.classList.remove('resizing-or-maximizing'), 200);
     }
 
-    // Progress Loader Function supporting custom durations
     function runTimedProgress(barElement, durationMs, statusCallback, completeCallback) {
       const intervalMs = 100;
       let elapsedTime = 0;
@@ -808,7 +1208,7 @@
         const progress = Math.min((elapsedTime / durationMs) * 100, 100);
         barElement.style.width = progress + '%';
 
-        if (statusCallback) statusCallback(progress);
+        if (statusCallback) statusCallback(progress, elapsedTime);
 
         if (elapsedTime >= durationMs) {
           clearInterval(interval);
@@ -817,42 +1217,273 @@
       }, intervalMs);
     }
 
-    // App: Galaxy OS Installer App (30s progress)
+    // Buy Galaxy+ Standalone App
+    function openBuyGalaxyPlusApp() {
+      const content = `
+        <div class="installer-window">
+          <div class="galaxy-plus-card" style="margin-top: 20px;">
+            <span class="galaxy-plus-badge">GALAXY+ UNLIMITED</span>
+            <h2 style="font-size: 20px; margin: 10px 0;">Unlock Liquid Glass & Speed Tiers</h2>
+            <p style="font-size: 13px; opacity: 0.9; line-height: 1.5; margin-bottom: 12px;">
+              - High-Speed 10s and 5s OS Installers<br>
+              - Exclusive Liquid Glass Theme<br>
+              - Priority UI Rendering
+            </p>
+            <div style="font-size: 22px; font-weight: bold; color: #fff;">$9.99 <span style="font-size: 12px; font-weight: normal; opacity: 0.8;">/ month</span></div>
+          </div>
+
+          <p id="app-plus-purchased-msg" style="display: ${hasGalaxyPlus ? 'block' : 'none'}; color: #38ef7d; font-weight: bold; font-size: 14px; margin-top: 10px;">✨ Galaxy+ Activated!</p>
+
+          <div class="installer-btn-group" style="margin-bottom: 20px;">
+            <button class="installer-btn btn-primary" id="app-buy-plus-btn" onclick="buyGalaxyPlus()" ${hasGalaxyPlus ? 'disabled' : ''}>
+              ${hasGalaxyPlus ? 'Purchased ✓' : 'Upgrade to Galaxy+ Now'}
+            </button>
+          </div>
+        </div>
+      `;
+      createWindow('Buy Galaxy+', content);
+    }
+
+    // Settings App
+    function openSettings() {
+      const settingsHTML = `
+        <div class="settings-container">
+          <h2>Galaxy OS Settings</h2>
+          
+          <div class="settings-section">
+            <h3>🎨 Personalization & Theme</h3>
+            <p style="font-size: 12px; margin-bottom: 14px; opacity: 0.8;">Choose your preferred desktop appearance:</p>
+            <div class="theme-options">
+              <div class="theme-card ${currentTheme === 'dark' ? 'active' : ''}" data-theme="dark" onclick="setTheme('dark')">
+                <div class="theme-card-icon">🌙</div>
+                <div class="theme-card-title">Dark Mode</div>
+              </div>
+              <div class="theme-card ${currentTheme === 'light' ? 'active' : ''}" data-theme="light" onclick="setTheme('light')">
+                <div class="theme-card-icon">☀️</div>
+                <div class="theme-card-title">Light Mode</div>
+              </div>
+              <div class="theme-card ${!hasGalaxyPlus ? 'locked' : ''} ${currentTheme === 'glass' ? 'active' : ''}" id="glass-theme-card" data-theme="glass" onclick="setTheme('glass')">
+                <div class="theme-card-icon">💧</div>
+                <div class="theme-card-title">Liquid Glass ${!hasGalaxyPlus ? '🔒' : ''}</div>
+              </div>
+            </div>
+
+            <div class="aero-toggle-wrapper ${currentTheme !== 'glass' ? 'disabled' : ''}" id="aero-toggle-wrapper">
+              <div class="aero-toggle-row">
+                <div>
+                  <strong style="font-size: 13px;">Clear (Aero Glass)</strong>
+                  <p style="font-size: 11px; opacity: 0.7;">Enables full transparent blur effect across windows and taskbar.</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="aero-checkbox" ${isClearMode ? 'checked' : ''} onchange="toggleClearMode(this.checked)">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="aero-slider-container ${isClearMode ? 'active' : ''}" id="aero-slider-box">
+                <div class="aero-slider-header">
+                  <span>Glass Transparency</span>
+                  <span id="aero-opacity-val">${aeroTransparencyPercent}%</span>
+                </div>
+                <input type="range" class="aero-range-input" min="0" max="200" step="1" value="${aeroTransparencyPercent}" oninput="updateAeroOpacity(this.value)">
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>ℹ️ System Information</h3>
+            <p style="font-size: 13px; line-height: 1.6;">
+              <strong>OS Version:</strong> Galaxy OS 1.0 Live<br>
+              <strong>Kernel:</strong> Web-JS Core<br>
+              <strong>Galaxy+ Status:</strong> <span id="settings-plus-status">${hasGalaxyPlus ? 'Active ✨' : 'Inactive'}</span>
+            </p>
+          </div>
+        </div>
+      `;
+      createWindow('Settings', settingsHTML);
+      updateAeroOpacity(aeroTransparencyPercent);
+    }
+
+    // Multi-Step Galaxy OS Installer
     function openInstaller() {
       if (document.getElementById('installer-window-el')) return;
 
       const installerHTML = `
         <div class="installer-window" id="installer-window-el">
-          <h2>Install Galaxy OS 1.0</h2>
-          <p style="margin-top: 10px; color: var(--text-color);">Welcome! Click below to begin installing Galaxy OS.</p>
-          <button class="installer-btn" id="install-btn" onclick="runInstallationProcess(this)">Install Now</button>
-          <div class="progress-bar-container" id="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
+          
+          <div class="installer-step active" id="installer-step-1">
+            <h2>Step 1: Upgrade to Galaxy+</h2>
+            <p style="font-size: 12px; color: var(--text-color); margin-top: 4px;">Supercharge your Galaxy OS installation!</p>
+            
+            <div class="galaxy-plus-card">
+              <span class="galaxy-plus-badge">GALAXY+ EXCLUSIVE</span>
+              <h3 style="font-size: 16px; margin-bottom: 6px;">Unlock High-Speed Installation & Liquid Glass</h3>
+              <p style="font-size: 12px; opacity: 0.9; line-height: 1.4;">
+                Get access to Fast 10s & SUPER FAST 5s installation speeds, priority processing, and the exclusive Liquid Glass theme.
+              </p>
+              <div style="font-size: 18px; font-weight: bold; margin-top: 10px; color: #fff;">$9.99 <span style="font-size: 11px; font-weight: normal; opacity: 0.8;">/ month</span></div>
+            </div>
+
+            <p id="plus-purchased-msg" style="display: ${hasGalaxyPlus ? 'block' : 'none'}; color: #38ef7d; font-weight: bold; font-size: 13px;">✨ Galaxy+ Active!</p>
+
+            <div class="installer-btn-group">
+              <button class="installer-btn btn-primary" id="buy-plus-btn" onclick="buyGalaxyPlus()" ${hasGalaxyPlus ? 'disabled' : ''}>
+                ${hasGalaxyPlus ? 'Purchased ✓' : 'Buy Galaxy+'}
+              </button>
+              <button class="installer-btn" onclick="goToInstallerStep(2)">${hasGalaxyPlus ? 'Continue' : 'No Thanks, Continue'}</button>
+            </div>
           </div>
-          <p id="install-status" style="margin-top: 12px; font-size: 13px; color: var(--text-color);"></p>
+
+          <div class="installer-step" id="installer-step-2">
+            <h2>Step 2: Choose Installation Speed</h2>
+            <p style="font-size: 12px; color: var(--text-color); margin-top: 4px;">Select how fast you want Galaxy OS to install:</p>
+
+            <div class="speed-options-grid">
+              <div class="speed-card ${selectedInstallSpeedMs === 30000 ? 'selected' : ''}" id="speed-30000" onclick="selectSpeedOption(30000)">
+                <div>
+                  <strong>Normal</strong>
+                  <div style="font-size: 11px; opacity: 0.7;">Standard installation</div>
+                </div>
+                <span class="speed-tag">30 seconds</span>
+              </div>
+
+              <div class="speed-card ${hasGalaxyPlus ? '' : 'locked'} ${selectedInstallSpeedMs === 10000 ? 'selected' : ''}" id="speed-10000" onclick="selectSpeedOption(10000)">
+                <div>
+                  <strong>Fast</strong>
+                  <div style="font-size: 11px; opacity: 0.7;">Accelerated extraction</div>
+                </div>
+                <span class="speed-tag">${hasGalaxyPlus ? '10 seconds' : 'Galaxy+ Only [10s]'}</span>
+              </div>
+
+              <div class="speed-card ${hasGalaxyPlus ? '' : 'locked'} ${selectedInstallSpeedMs === 5000 ? 'selected' : ''}" id="speed-5000" onclick="selectSpeedOption(5000)">
+                <div>
+                  <strong>SUPER FAST</strong>
+                  <div style="font-size: 11px; opacity: 0.7;">Instant hyper-threading</div>
+                </div>
+                <span class="speed-tag">${hasGalaxyPlus ? '5 seconds' : 'Galaxy+ Only [5s]'}</span>
+              </div>
+            </div>
+
+            <div class="installer-btn-group">
+              <button class="installer-btn" onclick="goToInstallerStep(1)">Back</button>
+              <button class="installer-btn btn-primary" onclick="goToInstallerStep(3)">Next</button>
+            </div>
+          </div>
+
+          <div class="installer-step" id="installer-step-3">
+            <h2>Step 3: Ready to Install</h2>
+            <p style="margin-top: 10px; color: var(--text-color); font-size: 13px;" id="speed-summary-text">
+              Ready to deploy Galaxy OS.
+            </p>
+            
+            <div class="progress-bar-container" id="progress-container">
+              <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <p id="install-status" style="margin-top: 12px; font-size: 13px; color: var(--text-color);"></p>
+
+            <div class="installer-btn-group" id="step3-controls">
+              <button class="installer-btn" onclick="goToInstallerStep(2)">Back</button>
+              <button class="installer-btn btn-primary" onclick="runInstallationProcess(this)">Install Now</button>
+            </div>
+          </div>
+
         </div>
       `;
       installerWin = createWindow('Install Galaxy OS', installerHTML);
     }
 
+    function buyGalaxyPlus() {
+      hasGalaxyPlus = true;
+
+      // Update Installer Step 1 UI
+      const buyBtn = document.getElementById('buy-plus-btn');
+      if (buyBtn) {
+        buyBtn.innerText = "Purchased ✓";
+        buyBtn.disabled = true;
+      }
+      const msg = document.getElementById('plus-purchased-msg');
+      if (msg) msg.style.display = 'block';
+
+      // Update Buy Galaxy+ App UI
+      const appBuyBtn = document.getElementById('app-buy-plus-btn');
+      if (appBuyBtn) {
+        appBuyBtn.innerText = "Purchased ✓";
+        appBuyBtn.disabled = true;
+      }
+      const appMsg = document.getElementById('app-plus-purchased-msg');
+      if (appMsg) appMsg.style.display = 'block';
+
+      // Unlock fast options in Step 2 grid UI
+      const card10 = document.getElementById('speed-10000');
+      const card5 = document.getElementById('speed-5000');
+      if (card10) {
+        card10.classList.remove('locked');
+        card10.querySelector('.speed-tag').innerText = '10 seconds';
+      }
+      if (card5) {
+        card5.classList.remove('locked');
+        card5.querySelector('.speed-tag').innerText = '5 seconds';
+      }
+
+      // Unlock Liquid Glass in Settings UI
+      const glassCard = document.getElementById('glass-theme-card');
+      if (glassCard) {
+        glassCard.classList.remove('locked');
+        glassCard.querySelector('.theme-card-title').innerText = 'Liquid Glass';
+      }
+      const settingsStatus = document.getElementById('settings-plus-status');
+      if (settingsStatus) settingsStatus.innerText = 'Active ✨';
+
+      // Unlock Liquid Glass in App Store UI
+      const storeGlassBtn = document.getElementById('store-glass-btn');
+      if (storeGlassBtn) storeGlassBtn.disabled = false;
+    }
+
+    function goToInstallerStep(stepNum) {
+      document.querySelectorAll('.installer-step').forEach(step => step.classList.remove('active'));
+      const activeStep = document.getElementById(`installer-step-${stepNum}`);
+      if (activeStep) activeStep.classList.add('active');
+
+      if (stepNum === 3) {
+        let displayRealTime = selectedInstallSpeedMs / 1000;
+        document.getElementById('speed-summary-text').innerHTML = 
+          `Selected Speed: <strong>${displayRealTime} Seconds</strong>`;
+      }
+    }
+
+    function selectSpeedOption(realSpeedMs) {
+      if ((realSpeedMs === 10000 || realSpeedMs === 5000) && !hasGalaxyPlus) {
+        alert("Please upgrade to Galaxy+ to select high-speed installation!");
+        return;
+      }
+
+      selectedInstallSpeedMs = realSpeedMs;
+
+      document.querySelectorAll('.speed-card').forEach(card => card.classList.remove('selected'));
+      const activeCard = document.getElementById(`speed-${realSpeedMs}`);
+      if (activeCard) activeCard.classList.add('selected');
+    }
+
     function runInstallationProcess(btn) {
-      btn.style.display = 'none';
+      document.getElementById('step3-controls').style.display = 'none';
       const container = document.getElementById('progress-container');
       const progressBar = document.getElementById('progress-bar');
       const statusText = document.getElementById('install-status');
 
       container.style.display = 'block';
 
-      // 30 Seconds = 30,000 ms
+      let totalSec = selectedInstallSpeedMs / 1000;
+
       runTimedProgress(
         progressBar,
-        30000,
-        (progress) => {
-          if (progress < 20) statusText.innerText = "Initializing system disk partition...";
-          else if (progress < 45) statusText.innerText = "Extracting Galaxy OS core packages...";
-          else if (progress < 70) statusText.innerText = "Installing core system dependencies...";
-          else if (progress < 90) statusText.innerText = "Configuring user workspace settings...";
-          else if (progress < 100) statusText.innerText = "Finalizing installation...";
+        selectedInstallSpeedMs,
+        (progress, elapsedTime) => {
+          let secondsLeft = Math.max(0, Math.ceil(totalSec - (elapsedTime / 1000)));
+
+          if (progress < 20) statusText.innerText = `Initializing partition... (${secondsLeft}s remaining)`;
+          else if (progress < 50) statusText.innerText = `Extracting core files... (${secondsLeft}s remaining)`;
+          else if (progress < 80) statusText.innerText = `Setting up UI & themes... (${secondsLeft}s remaining)`;
+          else if (progress < 100) statusText.innerText = `Finalizing system setup... (${secondsLeft}s remaining)`;
           else statusText.innerText = "Installation complete!";
         },
         () => {
@@ -871,12 +1502,30 @@
       );
     }
 
-    // App: Functional App Store (Square cards + 10s progress loader)
+    // App Store
     function openAppStore() {
       const storeHTML = `
         <div class="appstore-container">
           <div class="app-card">
-            <div class="app-card-icon">⚙️</div>
+            <div class="app-card-icon">✨</div>
+            <div class="app-card-title">Buy Galaxy+</div>
+            <div class="app-card-desc">Unlock high-speed install & Liquid Glass.</div>
+            <button class="app-card-btn" onclick="openBuyGalaxyPlusApp()">
+              ${hasGalaxyPlus ? 'Active' : 'Upgrade'}
+            </button>
+          </div>
+
+          <div class="app-card">
+            <div class="app-card-icon">💧</div>
+            <div class="app-card-title">Liquid Glass</div>
+            <div class="app-card-desc">Galaxy+ exclusive theme styling.</div>
+            <button class="app-card-btn" id="store-glass-btn" onclick="setTheme('glass')" ${!hasGalaxyPlus ? 'disabled' : ''}>
+              ${!hasGalaxyPlus ? 'Galaxy+ Only' : 'Apply'}
+            </button>
+          </div>
+
+          <div class="app-card">
+            <div class="app-card-icon">📄</div>
             <div class="app-card-title">File Runner</div>
             <div class="app-card-desc">Execute HTML, scripts, audio, video, & images.</div>
             <button class="app-card-btn" onclick="installFileRunnerApp(this)" ${isFileRunnerInstalled ? 'disabled' : ''}>
@@ -925,23 +1574,18 @@
       btn.style.display = 'none';
       progressContainer.style.display = 'block';
 
-      runTimedProgress(
-        progressBar,
-        10000,
-        null,
-        () => {
-          isFileRunnerInstalled = true;
-          progressContainer.style.display = 'none';
-          btn.innerText = "Installed";
-          btn.style.display = 'block';
-          btn.disabled = true;
+      runTimedProgress(progressBar, 10000, null, () => {
+        isFileRunnerInstalled = true;
+        progressContainer.style.display = 'none';
+        btn.innerText = "Installed";
+        btn.style.display = 'block';
+        btn.disabled = true;
 
-          document.querySelectorAll('.file-runner-app').forEach(app => {
-            app.classList.remove('installed-app');
-          });
-          alert("File Runner installed successfully!");
-        }
-      );
+        document.querySelectorAll('.file-runner-app').forEach(app => {
+          app.classList.remove('installed-app');
+        });
+        alert("File Runner installed successfully!");
+      });
     }
 
     function installRealChatApp(btn) {
@@ -954,23 +1598,18 @@
       btn.style.display = 'none';
       progressContainer.style.display = 'block';
 
-      runTimedProgress(
-        progressBar,
-        10000,
-        null,
-        () => {
-          isRealChatInstalled = true;
-          progressContainer.style.display = 'none';
-          btn.innerText = "Installed";
-          btn.style.display = 'block';
-          btn.disabled = true;
+      runTimedProgress(progressBar, 10000, null, () => {
+        isRealChatInstalled = true;
+        progressContainer.style.display = 'none';
+        btn.innerText = "Installed";
+        btn.style.display = 'block';
+        btn.disabled = true;
 
-          document.querySelectorAll('.realchat-app').forEach(app => {
-            app.classList.remove('installed-app');
-          });
-          alert("RealChat installed successfully!");
-        }
-      );
+        document.querySelectorAll('.realchat-app').forEach(app => {
+          app.classList.remove('installed-app');
+        });
+        alert("RealChat installed successfully!");
+      });
     }
 
     function installYt2App(btn) {
@@ -983,47 +1622,34 @@
       btn.style.display = 'none';
       progressContainer.style.display = 'block';
 
-      runTimedProgress(
-        progressBar,
-        10000,
-        null,
-        () => {
-          isYt2Installed = true;
-          progressContainer.style.display = 'none';
-          btn.innerText = "Installed";
-          btn.style.display = 'block';
-          btn.disabled = true;
+      runTimedProgress(progressBar, 10000, null, () => {
+        isYt2Installed = true;
+        progressContainer.style.display = 'none';
+        btn.innerText = "Installed";
+        btn.style.display = 'block';
+        btn.disabled = true;
 
-          document.querySelectorAll('.yt2-app').forEach(app => {
-            app.classList.remove('installed-app');
-          });
-          alert("YT 2 installed successfully!");
-        }
-      );
+        document.querySelectorAll('.yt2-app').forEach(app => {
+          app.classList.remove('installed-app');
+        });
+        alert("YT 2 installed successfully!");
+      });
     }
 
-    // App: RealChat
     function openRealChat() {
-      const realChatHTML = `
-        <iframe class="browser-frame" src="https://AtlasOs-Official.github.io/Galaxy/chats.html" style="width: 100%; height: 100%; border: none; background: #000;"></iframe>
-      `;
+      const realChatHTML = `<iframe class="browser-frame" src="https://AtlasOs-Official.github.io/Galaxy/chats.html"></iframe>`;
       createWindow('RealChat', realChatHTML);
     }
 
-    // App: YT 2
     function openYt2() {
-      const yt2HTML = `
-        <iframe class="browser-frame" src="https://AtlasOs-Official.github.io/Galaxy/yt2.html" style="width: 100%; height: 100%; border: none; background: #000;"></iframe>
-      `;
+      const yt2HTML = `<iframe class="browser-frame" src="https://AtlasOs-Official.github.io/Galaxy/yt2.html"></iframe>`;
       createWindow('YT 2', yt2HTML);
     }
 
-    // App: File Runner (.html, .bat, Audio, Video, & Picture Executor)
     function openFileRunner() {
       const runnerHTML = `
         <div class="file-runner-container">
           <div class="file-runner-controls">
-            <label style="font-size: 12px;">Type:</label>
             <select id="file-type-select" onchange="updateDefaultScriptTemplate(this)">
               <option value="html">HTML File (.html)</option>
               <option value="bat">Batch Script (.bat)</option>
@@ -1037,10 +1663,10 @@
               <input type="file" accept=".html,.htm,.bat,.png,.jpg,.jpeg,.gif,.svg,.webp,.mp3,.wav,.ogg,.mp4,.webm" style="display: none;" onchange="handleFileUpload(this)">
             </label>
 
-            <button class="run-btn" onclick="executeRunnerScript(this)">Run / Preview File</button>
-            <button class="fullscreen-btn" onclick="togglePreviewFullscreen(this)">⛶ Fullscreen Preview</button>
+            <button class="run-btn" onclick="executeRunnerScript(this)">Run File</button>
+            <button class="fullscreen-btn" onclick="togglePreviewFullscreen(this)">⛶ Fullscreen</button>
           </div>
-          <textarea class="file-runner-editor" id="file-code-input" placeholder="Enter file code, direct media URL, or upload a file above..."><h1 style="color: #9d4edd; font-family: sans-serif;">Hello from Galaxy OS!</h1>\n<p style="color: #fff;">HTML file successfully rendered.</p></textarea>
+          <textarea class="file-runner-editor" id="file-code-input"><h1 style="color: #9d4edd; font-family: sans-serif;">Hello Galaxy OS!</h1>\n<p style="color: #fff;">HTML file successfully rendered.</p></textarea>
           <div class="file-runner-preview-wrapper">
             <button class="exit-fullscreen-btn" onclick="togglePreviewFullscreen(this)">✕ Exit Fullscreen</button>
             <div class="file-runner-preview" id="file-runner-output"></div>
@@ -1051,8 +1677,7 @@
     }
 
     function togglePreviewFullscreen(btn) {
-      const container = btn.closest('.file-runner-container');
-      container.classList.toggle('fullscreen-preview');
+      btn.closest('.file-runner-container').classList.toggle('fullscreen-preview');
     }
 
     function handleFileUpload(input) {
@@ -1062,36 +1687,21 @@
       const container = input.closest('.file-runner-container');
       const select = container.querySelector('#file-type-select');
       const editor = container.querySelector('#file-code-input');
-
       const fileName = file.name.toLowerCase();
       
-      // Automatic extension detection
-      if (fileName.endsWith('.bat')) {
-        select.value = 'bat';
-      } else if (fileName.endsWith('.html') || fileName.endsWith('.htm')) {
-        select.value = 'html';
-      } else if (/\.(png|jpe?g|gif|svg|webp)$/i.test(fileName)) {
-        select.value = 'image';
-      } else if (/\.(mp3|wav|ogg)$/i.test(fileName)) {
-        select.value = 'audio';
-      } else if (/\.(mp4|webm)$/i.test(fileName)) {
-        select.value = 'video';
-      }
+      if (fileName.endsWith('.bat')) select.value = 'bat';
+      else if (fileName.endsWith('.html') || fileName.endsWith('.htm')) select.value = 'html';
+      else if (/\.(png|jpe?g|gif|svg|webp)$/i.test(fileName)) select.value = 'image';
+      else if (/\.(mp3|wav|ogg)$/i.test(fileName)) select.value = 'audio';
+      else if (/\.(mp4|webm)$/i.test(fileName)) select.value = 'video';
 
       const reader = new FileReader();
 
-      // Read text vs media objects
       if (select.value === 'html' || select.value === 'bat') {
-        reader.onload = function(e) {
-          editor.value = e.target.result;
-          executeRunnerScript(input);
-        };
+        reader.onload = e => { editor.value = e.target.result; executeRunnerScript(input); };
         reader.readAsText(file);
       } else {
-        reader.onload = function(e) {
-          editor.value = e.target.result; // Data URL for media
-          executeRunnerScript(input);
-        };
+        reader.onload = e => { editor.value = e.target.result; executeRunnerScript(input); };
         reader.readAsDataURL(file);
       }
     }
@@ -1101,9 +1711,9 @@
       const type = select.value;
 
       if (type === 'html') {
-        editor.value = `<h1 style="color: #9d4edd; font-family: sans-serif;">Hello from Galaxy OS!</h1>\n<p style="color: #fff;">HTML file successfully rendered.</p>`;
+        editor.value = `<h1 style="color: #9d4edd; font-family: sans-serif;">Hello Galaxy OS!</h1>\n<p style="color: #fff;">HTML file successfully rendered.</p>`;
       } else if (type === 'bat') {
-        editor.value = `@echo off\necho Initializing Galaxy OS Batch Runner...\necho System check: OK\necho Process complete!`;
+        editor.value = `@echo off\necho Running Batch Script...\necho Success!`;
       } else if (type === 'image') {
         editor.value = `https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80`;
       } else if (type === 'audio') {
@@ -1134,29 +1744,23 @@
       } else if (type === 'bat') {
         const consoleDiv = document.createElement('div');
         consoleDiv.style.padding = '12px';
-        consoleDiv.style.color = '#00ff66';
+        consoleDiv.style.color = '#38ef7d';
         consoleDiv.style.fontFamily = 'monospace';
         consoleDiv.style.fontSize = '13px';
         consoleDiv.style.whiteSpace = 'pre-wrap';
-        consoleDiv.style.width = '100%';
-
-        const lines = content.split('\n');
+        
         let outputText = '';
-        lines.forEach(line => {
+        content.split('\n').forEach(line => {
           let trimmed = line.trim();
-          if (trimmed.startsWith('echo ')) {
-            outputText += trimmed.substring(5) + '\n';
-          } else if (trimmed !== '@echo off' && trimmed !== '') {
-            outputText += `>'${trimmed}' is executed.\n`;
-          }
+          if (trimmed.startsWith('echo ')) outputText += trimmed.substring(5) + '\n';
+          else if (trimmed !== '@echo off' && trimmed !== '') outputText += `>'${trimmed}' executed.\n`;
         });
 
-        consoleDiv.innerText = outputText || 'Batch execution completed with no output.';
+        consoleDiv.innerText = outputText || 'Execution completed.';
         output.appendChild(consoleDiv);
       } else if (type === 'image') {
         const img = document.createElement('img');
         img.src = content;
-        img.alt = 'Image Preview';
         output.appendChild(img);
       } else if (type === 'audio') {
         const audio = document.createElement('audio');
@@ -1173,12 +1777,11 @@
       }
     }
 
-    // App: Web Browser
     function openBrowser() {
       const browserHTML = `
         <div class="browser-bar">
           <input type="text" id="browser-url" value="https://wikipedia.org">
-          <button style="padding: 0 10px;" onclick="loadUrl(this)">Go</button>
+          <button style="padding: 0 12px; border-radius: 12px; border: var(--glass-border); background: var(--mint-light-dark); color: #fff;" onclick="loadUrl(this)">Go</button>
         </div>
         <iframe class="browser-frame" src="https://wikipedia.org"></iframe>
       `;
@@ -1190,13 +1793,10 @@
       const input = win.querySelector('#browser-url');
       const iframe = win.querySelector('.browser-frame');
       let url = input.value;
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-      }
+      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       iframe.src = url;
     }
 
-    // App: Terminal
     function openTerminal() {
       const terminalHTML = `
         <div>Galaxy OS v1.0 (Terminal Shell)</div>
@@ -1216,31 +1816,20 @@
         const output = input.parentElement.previousElementSibling;
         
         let response = '';
-        if (command === 'help') {
-          response = 'Available commands: help, clear, whoami, date';
-        } else if (command === 'clear') {
-          output.innerHTML = '';
-          input.value = '';
-          return;
-        } else if (command === 'whoami') {
-          response = 'galaxy-user';
-        } else if (command === 'date') {
-          response = new Date().toString();
-        } else if (command !== '') {
-          response = `command not found: ${command}`;
-        }
+        if (command === 'help') response = 'Available commands: help, clear, whoami, date';
+        else if (command === 'clear') { output.innerHTML = ''; input.value = ''; return; }
+        else if (command === 'whoami') response = 'galaxy-user';
+        else if (command === 'date') response = new Date().toString();
+        else if (command !== '') response = `command not found: ${command}`;
 
         output.innerHTML += `<div>user@galaxy-os:~$ ${command}</div>`;
-        if (response) {
-          output.innerHTML += `<div>${response}</div>`;
-        }
+        if (response) output.innerHTML += `<div>${response}</div>`;
         
         input.value = '';
         input.scrollIntoView();
       }
     }
 
-    // Taskbar Tabs
     function addTaskbarItem(title, winElement) {
       const container = document.getElementById('tasks-container');
       const tab = document.createElement('div');
@@ -1258,7 +1847,6 @@
       observer.observe(document.body, { childList: true });
     }
 
-    // High-Performance Window Dragging
     function makeDraggable(elmnt) {
       let startX = 0, startY = 0;
       let initialLeft = 0, initialTop = 0;
@@ -1271,14 +1859,11 @@
         if (elmnt.classList.contains('maximized') || e.target.classList.contains('win-btn')) return;
 
         e.preventDefault();
-
         startX = e.clientX;
         startY = e.clientY;
         initialLeft = elmnt.offsetLeft;
         initialTop = elmnt.offsetTop;
         isDragging = true;
-
-        elmnt.classList.add('is-dragging');
 
         document.onmousemove = onMouseMove;
         document.onmouseup = stopDragging;
@@ -1300,9 +1885,7 @@
 
       function stopDragging() {
         isDragging = false;
-        elmnt.classList.remove('is-dragging');
         if (animationFrameId) cancelAnimationFrame(animationFrameId);
-
         document.onmousemove = null;
         document.onmouseup = null;
       }
