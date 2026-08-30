@@ -407,7 +407,7 @@
       position: relative;
     }
 
-    .theme-card:hover:not(.locked) {
+    .theme-card:hover {
       transform: translateY(-2px);
       background: rgba(255, 255, 255, 0.25);
     }
@@ -416,11 +416,6 @@
       border-color: #fff;
       background: rgba(255, 255, 255, 0.35);
       box-shadow: 0 0 15px rgba(255, 255, 255, 0.4), var(--glass-inner-shadow);
-    }
-
-    .theme-card.locked {
-      opacity: 0.55;
-      cursor: not-allowed;
     }
 
     .theme-card-icon {
@@ -584,37 +579,6 @@
       background: linear-gradient(135deg, #9d4edd, #c77dff);
     }
 
-    .installer-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-
-    /* Galaxy+ Banner Offer */
-    .galaxy-plus-card {
-      background: linear-gradient(135deg, rgba(157, 78, 221, 0.3), rgba(0, 122, 255, 0.3));
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 16px;
-      padding: 16px;
-      margin: 12px 0;
-      width: 100%;
-      max-width: 420px;
-    }
-
-    .galaxy-plus-badge {
-      display: inline-block;
-      background: linear-gradient(90deg, #ff007f, #7928ca);
-      color: #fff;
-      font-size: 10px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-    }
-
-    /* Speed Tiers Grid */
     .speed-options-grid {
       display: flex;
       flex-direction: column;
@@ -637,7 +601,7 @@
       text-align: left;
     }
 
-    .speed-card:hover:not(.locked) {
+    .speed-card:hover {
       background: rgba(255, 255, 255, 0.25);
     }
 
@@ -647,22 +611,11 @@
       box-shadow: 0 0 10px rgba(157, 78, 221, 0.4);
     }
 
-    .speed-card.locked {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
     .speed-tag {
       font-size: 10px;
       padding: 2px 6px;
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.2);
-    }
-
-    .speed-card.locked .speed-tag {
-      background: rgba(255, 0, 80, 0.3);
-      color: #ff80a0;
-      font-weight: bold;
     }
 
     .progress-bar-container {
@@ -950,10 +903,6 @@
       <div class="shortcut-icon">💿</div>
       <div class="shortcut-label">Install OS</div>
     </div>
-    <div class="shortcut" onclick="openBuyGalaxyPlusApp()">
-      <div class="shortcut-icon">✨</div>
-      <div class="shortcut-label">Buy Galaxy+</div>
-    </div>
     <div class="shortcut installed-app" onclick="openSettings()">
       <div class="shortcut-icon">⚙️</div>
       <div class="shortcut-label">Settings</div>
@@ -991,9 +940,6 @@
     <div class="menu-items">
       <div class="menu-item" id="installer-menu-item" onclick="openInstaller(); toggleStartMenu();">
         <span>💿</span> Install Galaxy OS
-      </div>
-      <div class="menu-item" onclick="openBuyGalaxyPlusApp(); toggleStartMenu();">
-        <span>✨</span> Buy Galaxy+
       </div>
       <div class="menu-item installed-app" onclick="openSettings(); toggleStartMenu();">
         <span>⚙️</span> Settings
@@ -1054,10 +1000,8 @@
     let isFileRunnerInstalled = false;
     let isRealChatInstalled = false;
     let isYt2Installed = false;
-
-    /* Global persistent Galaxy+ state and Speed Configurations */
-    let hasGalaxyPlus = false;
     let selectedInstallSpeedMs = 30000;
+    let pendingRmRfCommand = false;
 
     function updateClock() {
       const now = new Date();
@@ -1074,17 +1018,12 @@
     document.addEventListener('click', (e) => {
       const menu = document.getElementById('start-menu');
       const startBtn = document.getElementById('start-btn');
-      if (!menu.contains(e.target) && !startBtn.contains(e.target)) {
+      if (menu && startBtn && !menu.contains(e.target) && !startBtn.contains(e.target)) {
         menu.style.display = 'none';
       }
     });
 
     function setTheme(theme) {
-      if (theme === 'glass' && !hasGalaxyPlus) {
-        alert("Liquid Glass theme is a Galaxy+ exclusive! Please purchase Galaxy+ to unlock it.");
-        return;
-      }
-
       currentTheme = theme;
       applyThemeClasses();
       
@@ -1217,33 +1156,6 @@
       }, intervalMs);
     }
 
-    // Buy Galaxy+ Standalone App
-    function openBuyGalaxyPlusApp() {
-      const content = `
-        <div class="installer-window">
-          <div class="galaxy-plus-card" style="margin-top: 20px;">
-            <span class="galaxy-plus-badge">GALAXY+ UNLIMITED</span>
-            <h2 style="font-size: 20px; margin: 10px 0;">Unlock Liquid Glass & Speed Tiers</h2>
-            <p style="font-size: 13px; opacity: 0.9; line-height: 1.5; margin-bottom: 12px;">
-              - High-Speed 10s and 5s OS Installers<br>
-              - Exclusive Liquid Glass Theme<br>
-              - Priority UI Rendering
-            </p>
-            <div style="font-size: 22px; font-weight: bold; color: #fff;">$9.99 <span style="font-size: 12px; font-weight: normal; opacity: 0.8;">/ month</span></div>
-          </div>
-
-          <p id="app-plus-purchased-msg" style="display: ${hasGalaxyPlus ? 'block' : 'none'}; color: #38ef7d; font-weight: bold; font-size: 14px; margin-top: 10px;">✨ Galaxy+ Activated!</p>
-
-          <div class="installer-btn-group" style="margin-bottom: 20px;">
-            <button class="installer-btn btn-primary" id="app-buy-plus-btn" onclick="buyGalaxyPlus()" ${hasGalaxyPlus ? 'disabled' : ''}>
-              ${hasGalaxyPlus ? 'Purchased ✓' : 'Upgrade to Galaxy+ Now'}
-            </button>
-          </div>
-        </div>
-      `;
-      createWindow('Buy Galaxy+', content);
-    }
-
     // Settings App
     function openSettings() {
       const settingsHTML = `
@@ -1262,9 +1174,9 @@
                 <div class="theme-card-icon">☀️</div>
                 <div class="theme-card-title">Light Mode</div>
               </div>
-              <div class="theme-card ${!hasGalaxyPlus ? 'locked' : ''} ${currentTheme === 'glass' ? 'active' : ''}" id="glass-theme-card" data-theme="glass" onclick="setTheme('glass')">
+              <div class="theme-card ${currentTheme === 'glass' ? 'active' : ''}" id="glass-theme-card" data-theme="glass" onclick="setTheme('glass')">
                 <div class="theme-card-icon">💧</div>
-                <div class="theme-card-title">Liquid Glass ${!hasGalaxyPlus ? '🔒' : ''}</div>
+                <div class="theme-card-title">Liquid Glass</div>
               </div>
             </div>
 
@@ -1294,8 +1206,7 @@
             <h3>ℹ️ System Information</h3>
             <p style="font-size: 13px; line-height: 1.6;">
               <strong>OS Version:</strong> Galaxy OS 1.0 Live<br>
-              <strong>Kernel:</strong> Web-JS Core<br>
-              <strong>Galaxy+ Status:</strong> <span id="settings-plus-status">${hasGalaxyPlus ? 'Active ✨' : 'Inactive'}</span>
+              <strong>Kernel:</strong> Web-JS Core
             </p>
           </div>
         </div>
@@ -1312,30 +1223,7 @@
         <div class="installer-window" id="installer-window-el">
           
           <div class="installer-step active" id="installer-step-1">
-            <h2>Step 1: Upgrade to Galaxy+</h2>
-            <p style="font-size: 12px; color: var(--text-color); margin-top: 4px;">Supercharge your Galaxy OS installation!</p>
-            
-            <div class="galaxy-plus-card">
-              <span class="galaxy-plus-badge">GALAXY+ EXCLUSIVE</span>
-              <h3 style="font-size: 16px; margin-bottom: 6px;">Unlock High-Speed Installation & Liquid Glass</h3>
-              <p style="font-size: 12px; opacity: 0.9; line-height: 1.4;">
-                Get access to Fast 10s & SUPER FAST 5s installation speeds, priority processing, and the exclusive Liquid Glass theme.
-              </p>
-              <div style="font-size: 18px; font-weight: bold; margin-top: 10px; color: #fff;">$9.99 <span style="font-size: 11px; font-weight: normal; opacity: 0.8;">/ month</span></div>
-            </div>
-
-            <p id="plus-purchased-msg" style="display: ${hasGalaxyPlus ? 'block' : 'none'}; color: #38ef7d; font-weight: bold; font-size: 13px;">✨ Galaxy+ Active!</p>
-
-            <div class="installer-btn-group">
-              <button class="installer-btn btn-primary" id="buy-plus-btn" onclick="buyGalaxyPlus()" ${hasGalaxyPlus ? 'disabled' : ''}>
-                ${hasGalaxyPlus ? 'Purchased ✓' : 'Buy Galaxy+'}
-              </button>
-              <button class="installer-btn" onclick="goToInstallerStep(2)">${hasGalaxyPlus ? 'Continue' : 'No Thanks, Continue'}</button>
-            </div>
-          </div>
-
-          <div class="installer-step" id="installer-step-2">
-            <h2>Step 2: Choose Installation Speed</h2>
+            <h2>Step 1: Choose Installation Speed</h2>
             <p style="font-size: 12px; color: var(--text-color); margin-top: 4px;">Select how fast you want Galaxy OS to install:</p>
 
             <div class="speed-options-grid">
@@ -1347,31 +1235,30 @@
                 <span class="speed-tag">30 seconds</span>
               </div>
 
-              <div class="speed-card ${hasGalaxyPlus ? '' : 'locked'} ${selectedInstallSpeedMs === 10000 ? 'selected' : ''}" id="speed-10000" onclick="selectSpeedOption(10000)">
+              <div class="speed-card ${selectedInstallSpeedMs === 10000 ? 'selected' : ''}" id="speed-10000" onclick="selectSpeedOption(10000)">
                 <div>
                   <strong>Fast</strong>
                   <div style="font-size: 11px; opacity: 0.7;">Accelerated extraction</div>
                 </div>
-                <span class="speed-tag">${hasGalaxyPlus ? '10 seconds' : 'Galaxy+ Only [10s]'}</span>
+                <span class="speed-tag">10 seconds</span>
               </div>
 
-              <div class="speed-card ${hasGalaxyPlus ? '' : 'locked'} ${selectedInstallSpeedMs === 5000 ? 'selected' : ''}" id="speed-5000" onclick="selectSpeedOption(5000)">
+              <div class="speed-card ${selectedInstallSpeedMs === 5000 ? 'selected' : ''}" id="speed-5000" onclick="selectSpeedOption(5000)">
                 <div>
                   <strong>SUPER FAST</strong>
                   <div style="font-size: 11px; opacity: 0.7;">Instant hyper-threading</div>
                 </div>
-                <span class="speed-tag">${hasGalaxyPlus ? '5 seconds' : 'Galaxy+ Only [5s]'}</span>
+                <span class="speed-tag">5 seconds</span>
               </div>
             </div>
 
             <div class="installer-btn-group">
-              <button class="installer-btn" onclick="goToInstallerStep(1)">Back</button>
-              <button class="installer-btn btn-primary" onclick="goToInstallerStep(3)">Next</button>
+              <button class="installer-btn btn-primary" onclick="goToInstallerStep(2)">Next</button>
             </div>
           </div>
 
-          <div class="installer-step" id="installer-step-3">
-            <h2>Step 3: Ready to Install</h2>
+          <div class="installer-step" id="installer-step-2">
+            <h2>Step 2: Ready to Install</h2>
             <p style="margin-top: 10px; color: var(--text-color); font-size: 13px;" id="speed-summary-text">
               Ready to deploy Galaxy OS.
             </p>
@@ -1381,8 +1268,8 @@
             </div>
             <p id="install-status" style="margin-top: 12px; font-size: 13px; color: var(--text-color);"></p>
 
-            <div class="installer-btn-group" id="step3-controls">
-              <button class="installer-btn" onclick="goToInstallerStep(2)">Back</button>
+            <div class="installer-btn-group" id="step2-controls">
+              <button class="installer-btn" onclick="goToInstallerStep(1)">Back</button>
               <button class="installer-btn btn-primary" onclick="runInstallationProcess(this)">Install Now</button>
             </div>
           </div>
@@ -1392,59 +1279,12 @@
       installerWin = createWindow('Install Galaxy OS', installerHTML);
     }
 
-    function buyGalaxyPlus() {
-      hasGalaxyPlus = true;
-
-      // Update Installer Step 1 UI
-      const buyBtn = document.getElementById('buy-plus-btn');
-      if (buyBtn) {
-        buyBtn.innerText = "Purchased ✓";
-        buyBtn.disabled = true;
-      }
-      const msg = document.getElementById('plus-purchased-msg');
-      if (msg) msg.style.display = 'block';
-
-      // Update Buy Galaxy+ App UI
-      const appBuyBtn = document.getElementById('app-buy-plus-btn');
-      if (appBuyBtn) {
-        appBuyBtn.innerText = "Purchased ✓";
-        appBuyBtn.disabled = true;
-      }
-      const appMsg = document.getElementById('app-plus-purchased-msg');
-      if (appMsg) appMsg.style.display = 'block';
-
-      // Unlock fast options in Step 2 grid UI
-      const card10 = document.getElementById('speed-10000');
-      const card5 = document.getElementById('speed-5000');
-      if (card10) {
-        card10.classList.remove('locked');
-        card10.querySelector('.speed-tag').innerText = '10 seconds';
-      }
-      if (card5) {
-        card5.classList.remove('locked');
-        card5.querySelector('.speed-tag').innerText = '5 seconds';
-      }
-
-      // Unlock Liquid Glass in Settings UI
-      const glassCard = document.getElementById('glass-theme-card');
-      if (glassCard) {
-        glassCard.classList.remove('locked');
-        glassCard.querySelector('.theme-card-title').innerText = 'Liquid Glass';
-      }
-      const settingsStatus = document.getElementById('settings-plus-status');
-      if (settingsStatus) settingsStatus.innerText = 'Active ✨';
-
-      // Unlock Liquid Glass in App Store UI
-      const storeGlassBtn = document.getElementById('store-glass-btn');
-      if (storeGlassBtn) storeGlassBtn.disabled = false;
-    }
-
     function goToInstallerStep(stepNum) {
       document.querySelectorAll('.installer-step').forEach(step => step.classList.remove('active'));
       const activeStep = document.getElementById(`installer-step-${stepNum}`);
       if (activeStep) activeStep.classList.add('active');
 
-      if (stepNum === 3) {
+      if (stepNum === 2) {
         let displayRealTime = selectedInstallSpeedMs / 1000;
         document.getElementById('speed-summary-text').innerHTML = 
           `Selected Speed: <strong>${displayRealTime} Seconds</strong>`;
@@ -1452,11 +1292,6 @@
     }
 
     function selectSpeedOption(realSpeedMs) {
-      if ((realSpeedMs === 10000 || realSpeedMs === 5000) && !hasGalaxyPlus) {
-        alert("Please upgrade to Galaxy+ to select high-speed installation!");
-        return;
-      }
-
       selectedInstallSpeedMs = realSpeedMs;
 
       document.querySelectorAll('.speed-card').forEach(card => card.classList.remove('selected'));
@@ -1465,7 +1300,7 @@
     }
 
     function runInstallationProcess(btn) {
-      document.getElementById('step3-controls').style.display = 'none';
+      document.getElementById('step2-controls').style.display = 'none';
       const container = document.getElementById('progress-container');
       const progressBar = document.getElementById('progress-bar');
       const statusText = document.getElementById('install-status');
@@ -1507,20 +1342,11 @@
       const storeHTML = `
         <div class="appstore-container">
           <div class="app-card">
-            <div class="app-card-icon">✨</div>
-            <div class="app-card-title">Buy Galaxy+</div>
-            <div class="app-card-desc">Unlock high-speed install & Liquid Glass.</div>
-            <button class="app-card-btn" onclick="openBuyGalaxyPlusApp()">
-              ${hasGalaxyPlus ? 'Active' : 'Upgrade'}
-            </button>
-          </div>
-
-          <div class="app-card">
             <div class="app-card-icon">💧</div>
             <div class="app-card-title">Liquid Glass</div>
-            <div class="app-card-desc">Galaxy+ exclusive theme styling.</div>
-            <button class="app-card-btn" id="store-glass-btn" onclick="setTheme('glass')" ${!hasGalaxyPlus ? 'disabled' : ''}>
-              ${!hasGalaxyPlus ? 'Galaxy+ Only' : 'Apply'}
+            <div class="app-card-desc">Ultra liquid glass theme styling.</div>
+            <button class="app-card-btn" id="store-glass-btn" onclick="setTheme('glass')">
+              Apply Theme
             </button>
           </div>
 
@@ -1803,26 +1629,119 @@
         <div>Type 'help' or 'clear'.</div><br>
         <div id="term-output"></div>
         <div class="terminal-input-line">
-          <span>user@galaxy-os:~$</span>
+          <span id="term-prompt">user@galaxy-os:~$</span>
           <input type="text" class="terminal-input" autofocus onkeydown="handleTerminal(event, this)">
         </div>
       `;
       createWindow('Terminal', terminalHTML, 'terminal-body');
     }
 
+    function triggerSystemDestruction(terminalInput) {
+      const terminalWin = terminalInput.closest('.window');
+      const output = terminalInput.parentElement.previousElementSibling;
+
+      output.innerHTML += `<div style="color: #ff5f56; font-weight: bold;">[SYSTEM DESTRUCTION INITIATED]</div>`;
+
+      const destroySteps = [
+        () => {
+          output.innerHTML += `<div>Deleting system binaries /bin, /usr, /sys...</div>`;
+          document.querySelectorAll('.shortcut').forEach((sc, i) => {
+            setTimeout(() => sc.remove(), i * 150);
+          });
+        },
+        () => {
+          output.innerHTML += `<div>Removing desktop icons and shortcuts...</div>`;
+          document.querySelectorAll('.menu-item').forEach((mi, i) => {
+            setTimeout(() => mi.remove(), i * 100);
+          });
+        },
+        () => {
+          output.innerHTML += `<div>Purging Start menu and application registries...</div>`;
+          document.getElementById('start-menu')?.remove();
+        },
+        () => {
+          output.innerHTML += `<div>Closing active windows...</div>`;
+          document.querySelectorAll('.window').forEach(win => {
+            if (win !== terminalWin) win.remove();
+          });
+        },
+        () => {
+          output.innerHTML += `<div>Destroying Taskbar Panel and Clock...</div>`;
+          document.getElementById('panel')?.remove();
+        },
+        () => {
+          output.innerHTML += `<div>Wiping system theme memory and background wallpapers...</div>`;
+          document.body.style.background = '#000000';
+          document.body.style.backgroundImage = 'none';
+          document.body.className = '';
+        },
+        () => {
+          output.innerHTML += `<div style="color: #ff5f56; font-weight: bold;">Deleting active Terminal session...</div>`;
+          setTimeout(() => {
+            document.body.innerHTML = '';
+            document.body.style.background = '#000';
+          }, 1500);
+        }
+      ];
+
+      destroySteps.forEach((step, idx) => {
+        setTimeout(step, idx * 1000);
+      });
+    }
+
     function handleTerminal(e, input) {
       if (e.key === 'Enter') {
-        const command = input.value.trim();
+        const rawCommand = input.value.trim();
+        const command = rawCommand.toLowerCase();
         const output = input.parentElement.previousElementSibling;
+        const promptLabel = document.getElementById('term-prompt');
         
         let response = '';
-        if (command === 'help') response = 'Available commands: help, clear, whoami, date';
-        else if (command === 'clear') { output.innerHTML = ''; input.value = ''; return; }
-        else if (command === 'whoami') response = 'galaxy-user';
-        else if (command === 'date') response = new Date().toString();
-        else if (command !== '') response = `command not found: ${command}`;
 
-        output.innerHTML += `<div>user@galaxy-os:~$ ${command}</div>`;
+        if (pendingRmRfCommand) {
+          output.innerHTML += `<div>[Y/N]: ${rawCommand}</div>`;
+          if (command === 'y') {
+            pendingRmRfCommand = false;
+            promptLabel.innerText = 'sudo:';
+            input.value = '';
+            triggerSystemDestruction(input);
+            return;
+          } else if (command === 'n') {
+            pendingRmRfCommand = false;
+            promptLabel.innerText = 'user@galaxy-os:~$';
+            output.innerHTML += `<div>Operation cancelled by user.</div>`;
+            input.value = '';
+            return;
+          } else {
+            output.innerHTML += `<div style="color: #ff5f56;">Invalid input. Please type Y to confirm or N to cancel [Y/N]:</div>`;
+            input.value = '';
+            return;
+          }
+        }
+
+        if (command === 'help') {
+          response = 'Available commands: help, clear, whoami, date, sudo rm -rf /*';
+        } else if (command === 'clear') {
+          output.innerHTML = '';
+          input.value = '';
+          return;
+        } else if (command === 'whoami') {
+          response = 'galaxy-user';
+        } else if (command === 'date') {
+          response = new Date().toString();
+        } else if (command === 'sudo rm -rf /*') {
+          pendingRmRfCommand = true;
+          output.innerHTML += `<div>user@galaxy-os:~$ ${rawCommand}</div>`;
+          output.innerHTML += `<div style="color: #ff5f56; font-weight: bold;">WARNING: This will delete EVERYTHING on this system, including apps, desktop, taskbar, background, and this terminal!</div>`;
+          output.innerHTML += `<div style="color: #ffbb00;">Do you want to continue? [Y/N]:</div>`;
+          promptLabel.innerText = 'confirm [y/n]:';
+          input.value = '';
+          return;
+        } else if (command !== '') {
+          response = `command not found: ${rawCommand}`;
+        }
+
+        output.innerHTML += `<div>user@galaxy-os:~$ ${rawCommand}</div>`;
         if (response) output.innerHTML += `<div>${response}</div>`;
         
         input.value = '';
@@ -1832,6 +1751,7 @@
 
     function addTaskbarItem(title, winElement) {
       const container = document.getElementById('tasks-container');
+      if (!container) return;
       const tab = document.createElement('div');
       tab.className = 'task-tab';
       tab.innerText = title;
