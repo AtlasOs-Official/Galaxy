@@ -634,7 +634,7 @@
       width: 0%;
       height: 100%;
       background: linear-gradient(90deg, #38ef7d, #11998e);
-      transition: width 0.1s linear;
+      transition: width 0.05s linear;
     }
 
     .terminal-body {
@@ -767,7 +767,7 @@
       width: 0%;
       height: 100%;
       background: #007aff;
-      transition: width 0.1s linear;
+      transition: width 0.05s linear;
     }
 
     /* File Runner UI */
@@ -923,9 +923,9 @@
       <div class="shortcut-icon">📄</div>
       <div class="shortcut-label">File Runner</div>
     </div>
-    <div class="shortcut installed-app realchat-app" onclick="openRealChat()">
+    <div class="shortcut installed-app ajgconnect-app" onclick="openAjgConnect()">
       <div class="shortcut-icon">💬</div>
-      <div class="shortcut-label">RealChat</div>
+      <div class="shortcut-label">AJG Connect</div>
     </div>
     <div class="shortcut installed-app yt2-app" onclick="openYt2()">
       <div class="shortcut-icon">📺</div>
@@ -956,8 +956,8 @@
       <div class="menu-item installed-app file-runner-app" onclick="openFileRunner(); toggleStartMenu();">
         <span>📄</span> File Runner
       </div>
-      <div class="menu-item installed-app realchat-app" onclick="openRealChat(); toggleStartMenu();">
-        <span>💬</span> RealChat
+      <div class="menu-item installed-app ajgconnect-app" onclick="openAjgConnect(); toggleStartMenu();">
+        <span>💬</span> AJG Connect
       </div>
       <div class="menu-item installed-app yt2-app" onclick="openYt2(); toggleStartMenu();">
         <span>📺</span> YT 2
@@ -998,9 +998,9 @@
     let isClearMode = false;
     let aeroTransparencyPercent = 80;
     let isFileRunnerInstalled = false;
-    let isRealChatInstalled = false;
+    let isAjgConnectInstalled = false;
     let isYt2Installed = false;
-    let selectedInstallSpeedMs = 30000;
+    let selectedInstallSpeedMs = 10000; // Default OS installation speed (10s)
     let pendingRmRfCommand = false;
 
     function updateClock() {
@@ -1139,7 +1139,14 @@
     }
 
     function runTimedProgress(barElement, durationMs, statusCallback, completeCallback) {
-      const intervalMs = 100;
+      if (durationMs === 0) {
+        barElement.style.width = '100%';
+        if (statusCallback) statusCallback(100, 0);
+        if (completeCallback) completeCallback();
+        return;
+      }
+
+      const intervalMs = 30;
       let elapsedTime = 0;
 
       const interval = setInterval(() => {
@@ -1227,28 +1234,36 @@
             <p style="font-size: 12px; color: var(--text-color); margin-top: 4px;">Select how fast you want Galaxy OS to install:</p>
 
             <div class="speed-options-grid">
-              <div class="speed-card ${selectedInstallSpeedMs === 30000 ? 'selected' : ''}" id="speed-30000" onclick="selectSpeedOption(30000)">
-                <div>
-                  <strong>Normal</strong>
-                  <div style="font-size: 11px; opacity: 0.7;">Standard installation</div>
-                </div>
-                <span class="speed-tag">30 seconds</span>
-              </div>
-
               <div class="speed-card ${selectedInstallSpeedMs === 10000 ? 'selected' : ''}" id="speed-10000" onclick="selectSpeedOption(10000)">
                 <div>
-                  <strong>Fast</strong>
-                  <div style="font-size: 11px; opacity: 0.7;">Accelerated extraction</div>
+                  <strong>Normal</strong>
+                  <div style="font-size: 11px; opacity: 0.7;">Standard deployment</div>
                 </div>
                 <span class="speed-tag">10 seconds</span>
               </div>
 
-              <div class="speed-card ${selectedInstallSpeedMs === 5000 ? 'selected' : ''}" id="speed-5000" onclick="selectSpeedOption(5000)">
+              <div class="speed-card ${selectedInstallSpeedMs === 3000 ? 'selected' : ''}" id="speed-3000" onclick="selectSpeedOption(3000)">
                 <div>
-                  <strong>SUPER FAST</strong>
-                  <div style="font-size: 11px; opacity: 0.7;">Instant hyper-threading</div>
+                  <strong>Fast</strong>
+                  <div style="font-size: 11px; opacity: 0.7;">Quick deployment</div>
                 </div>
-                <span class="speed-tag">5 seconds</span>
+                <span class="speed-tag">3 seconds</span>
+              </div>
+
+              <div class="speed-card ${selectedInstallSpeedMs === 1000 ? 'selected' : ''}" id="speed-1000" onclick="selectSpeedOption(1000)">
+                <div>
+                  <strong>Turbo</strong>
+                  <div style="font-size: 11px; opacity: 0.7;">Lightning fast</div>
+                </div>
+                <span class="speed-tag">1 second</span>
+              </div>
+
+              <div class="speed-card ${selectedInstallSpeedMs === 0 ? 'selected' : ''}" id="speed-0" onclick="selectSpeedOption(0)">
+                <div>
+                  <strong>INSTANT</strong>
+                  <div style="font-size: 11px; opacity: 0.7;">Zero delay installation</div>
+                </div>
+                <span class="speed-tag">Instant (0s)</span>
               </div>
             </div>
 
@@ -1285,9 +1300,9 @@
       if (activeStep) activeStep.classList.add('active');
 
       if (stepNum === 2) {
-        let displayRealTime = selectedInstallSpeedMs / 1000;
+        let displayRealTime = (selectedInstallSpeedMs / 1000).toFixed(1);
         document.getElementById('speed-summary-text').innerHTML = 
-          `Selected Speed: <strong>${displayRealTime} Seconds</strong>`;
+          `Selected Speed: <strong>${selectedInstallSpeedMs === 0 ? 'Instant' : displayRealTime + ' Seconds'}</strong>`;
       }
     }
 
@@ -1307,18 +1322,12 @@
 
       container.style.display = 'block';
 
-      let totalSec = selectedInstallSpeedMs / 1000;
-
       runTimedProgress(
         progressBar,
         selectedInstallSpeedMs,
         (progress, elapsedTime) => {
-          let secondsLeft = Math.max(0, Math.ceil(totalSec - (elapsedTime / 1000)));
-
-          if (progress < 20) statusText.innerText = `Initializing partition... (${secondsLeft}s remaining)`;
-          else if (progress < 50) statusText.innerText = `Extracting core files... (${secondsLeft}s remaining)`;
-          else if (progress < 80) statusText.innerText = `Setting up UI & themes... (${secondsLeft}s remaining)`;
-          else if (progress < 100) statusText.innerText = `Finalizing system setup... (${secondsLeft}s remaining)`;
+          if (progress < 50) statusText.innerText = `Extracting system files... (${Math.round(progress)}%)`;
+          else if (progress < 100) statusText.innerText = `Configuring user environment... (${Math.round(progress)}%)`;
           else statusText.innerText = "Installation complete!";
         },
         () => {
@@ -1326,13 +1335,13 @@
             document.getElementById('installer-shortcut')?.remove();
             document.getElementById('installer-menu-item')?.remove();
             
-            document.querySelectorAll('.installed-app:not(.file-runner-app):not(.realchat-app):not(.yt2-app)').forEach(app => {
+            document.querySelectorAll('.installed-app:not(.file-runner-app):not(.ajgconnect-app):not(.yt2-app)').forEach(app => {
               app.classList.remove('installed-app');
             });
             
             if (installerWin) installerWin.remove();
             alert("Galaxy OS has been successfully installed!");
-          }, 300);
+          }, 150);
         }
       );
     }
@@ -1364,10 +1373,10 @@
 
           <div class="app-card">
             <div class="app-card-icon">💬</div>
-            <div class="app-card-title">RealChat</div>
+            <div class="app-card-title">AJG Connect</div>
             <div class="app-card-desc">Connect and chat live across Galaxy.</div>
-            <button class="app-card-btn" onclick="installRealChatApp(this)" ${isRealChatInstalled ? 'disabled' : ''}>
-              ${isRealChatInstalled ? 'Installed' : 'Install'}
+            <button class="app-card-btn" onclick="installAjgConnectApp(this)" ${isAjgConnectInstalled ? 'disabled' : ''}>
+              ${isAjgConnectInstalled ? 'Installed' : 'Install'}
             </button>
             <div class="app-card-progress-container">
               <div class="app-card-progress-bar"></div>
@@ -1400,7 +1409,7 @@
       btn.style.display = 'none';
       progressContainer.style.display = 'block';
 
-      runTimedProgress(progressBar, 10000, null, () => {
+      runTimedProgress(progressBar, 5000, null, () => {
         isFileRunnerInstalled = true;
         progressContainer.style.display = 'none';
         btn.innerText = "Installed";
@@ -1414,8 +1423,8 @@
       });
     }
 
-    function installRealChatApp(btn) {
-      if (isRealChatInstalled) return;
+    function installAjgConnectApp(btn) {
+      if (isAjgConnectInstalled) return;
 
       const card = btn.closest('.app-card');
       const progressContainer = card.querySelector('.app-card-progress-container');
@@ -1424,17 +1433,17 @@
       btn.style.display = 'none';
       progressContainer.style.display = 'block';
 
-      runTimedProgress(progressBar, 10000, null, () => {
-        isRealChatInstalled = true;
+      runTimedProgress(progressBar, 5000, null, () => {
+        isAjgConnectInstalled = true;
         progressContainer.style.display = 'none';
         btn.innerText = "Installed";
         btn.style.display = 'block';
         btn.disabled = true;
 
-        document.querySelectorAll('.realchat-app').forEach(app => {
+        document.querySelectorAll('.ajgconnect-app').forEach(app => {
           app.classList.remove('installed-app');
         });
-        alert("RealChat installed successfully!");
+        alert("AJG Connect installed successfully!");
       });
     }
 
@@ -1448,7 +1457,7 @@
       btn.style.display = 'none';
       progressContainer.style.display = 'block';
 
-      runTimedProgress(progressBar, 10000, null, () => {
+      runTimedProgress(progressBar, 5000, null, () => {
         isYt2Installed = true;
         progressContainer.style.display = 'none';
         btn.innerText = "Installed";
@@ -1462,9 +1471,9 @@
       });
     }
 
-    function openRealChat() {
-      const realChatHTML = `<iframe class="browser-frame" src="https://AtlasOs-Official.github.io/Galaxy/chats.html"></iframe>`;
-      createWindow('RealChat', realChatHTML);
+    function openAjgConnect() {
+      const ajgConnectHTML = `<iframe class="browser-frame" src="https://AtlasOs-Official.github.io/Galaxy/chats.html"></iframe>`;
+      createWindow('AJG Connect', ajgConnectHTML);
     }
 
     function openYt2() {
