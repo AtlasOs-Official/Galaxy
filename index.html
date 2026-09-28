@@ -87,6 +87,88 @@
       display: none !important;
     }
 
+    /* Startup Modal Overlay */
+    #startup-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+
+    .startup-modal-card {
+      width: 400px;
+      background: var(--mint-dark);
+      backdrop-filter: var(--glass-backdrop);
+      -webkit-backdrop-filter: var(--glass-backdrop);
+      border: var(--glass-border);
+      box-shadow: var(--window-shadow);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: modalPopupIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalPopupIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .startup-modal-icon {
+      font-size: 38px;
+    }
+
+    .startup-modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .startup-modal-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-main);
+    }
+
+    .startup-modal-link {
+      color: #7dd3fc;
+      word-break: break-all;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .startup-modal-link:hover {
+      text-decoration: underline;
+    }
+
+    .startup-modal-btn {
+      background: linear-gradient(135deg, #7b2cbf, #9d4edd);
+      border: var(--glass-border);
+      color: white;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 4px;
+    }
+
+    .startup-modal-btn:hover {
+      transform: scale(1.02);
+      filter: brightness(1.1);
+    }
+
     /* Desktop Layout */
     #desktop {
       height: calc(100vh - 40px);
@@ -898,6 +980,18 @@
 </head>
 <body class="theme-dark">
 
+  <!-- Startup Notice Popup Modal -->
+  <div id="startup-modal-overlay">
+    <div class="startup-modal-card">
+      <div class="startup-modal-icon">⚠️</div>
+      <div class="startup-modal-title">Notice</div>
+      <div class="startup-modal-text">
+        soon this site will redirect you to <a class="startup-modal-link" href="https://atlasos-official.github.io/Nova" target="_blank">https://atlasos-official.github.io/Nova</a> [not out yet]
+      </div>
+      <button class="startup-modal-btn" onclick="dismissStartupModal()">Understood</button>
+    </div>
+  </div>
+
   <div id="desktop">
     <div class="shortcut" id="installer-shortcut" onclick="openInstaller()">
       <div class="shortcut-icon">💿</div>
@@ -1009,6 +1103,15 @@
     }
     setInterval(updateClock, 1000);
     updateClock();
+
+    function dismissStartupModal() {
+      const modal = document.getElementById('startup-modal-overlay');
+      if (modal) {
+        modal.style.transition = 'opacity 0.2s ease';
+        modal.style.opacity = '0';
+        setTimeout(() => modal.remove(), 200);
+      }
+    }
 
     function toggleStartMenu() {
       const menu = document.getElementById('start-menu');
@@ -1346,7 +1449,7 @@
       );
     }
 
-    // App Store
+    // App Store (with 5-second installation speed)
     function openAppStore() {
       const storeHTML = `
         <div class="appstore-container">
