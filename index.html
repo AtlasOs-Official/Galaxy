@@ -104,7 +104,7 @@
     }
 
     .startup-modal-card {
-      width: 400px;
+      width: 420px;
       background: var(--mint-dark);
       backdrop-filter: var(--glass-backdrop);
       -webkit-backdrop-filter: var(--glass-backdrop);
@@ -161,7 +161,7 @@
       border-radius: 16px;
       cursor: pointer;
       transition: all 0.2s ease;
-      margin-top: 4px;
+      margin-top: 10px;
     }
 
     .startup-modal-btn:hover {
@@ -985,8 +985,8 @@
     <div class="startup-modal-card">
       <div class="startup-modal-icon">⚠️</div>
       <div class="startup-modal-title">Notice</div>
-      <div class="startup-modal-text">
-        soon this site will redirect you to <a class="startup-modal-link" href="https://atlasos-official.github.io/Nova" target="_blank">https://atlasos-official.github.io/Nova</a> [not out yet]
+      <div class="startup-modal-text" id="startup-modal-desc">
+        Soon this site will [if you click yes] redirect you to <a class="startup-modal-link" href="https://atlasos-official.github.io/Nova" target="_blank">https://atlasos-official.github.io/Nova</a> [not out yet] if you press no it will take you to the here still with this popup
       </div>
       <button class="startup-modal-btn" onclick="dismissStartupModal()">Understood</button>
     </div>
@@ -1094,7 +1094,7 @@
     let isFileRunnerInstalled = false;
     let isAjgConnectInstalled = false;
     let isYt2Installed = false;
-    let selectedInstallSpeedMs = 10000; // Default OS installation speed (10s)
+    let selectedInstallSpeedMs = 10000;
     let pendingRmRfCommand = false;
 
     function updateClock() {
