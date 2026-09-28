@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galaxy OS Live Session</title>
+  <style>
+    :root {
+      --galaxy-accent: #9d4edd;
+      --galaxy-glow: #7b2cbf;
+      --bg-gradient: radial-gradient(circle at center, #240046 0%, #10002b 60%, #03001e 100%);
+      --mint-dark: #1a1829;
+      --mint-light-dark: #242038;
+      --mint-panel: #121020;
+      --text-color: #e0aaff;
+      --text-main: #f8f7ff;
+      --border-color: #3c096c;
+      --window-shadow: 0 8px 25px rgba(0,0,0,0.8);
+      --glass-backdrop: none;
+      --glass-border: 1px solid var(--border-color);
+      --glass-inner-shadow: none;
+      --aero-opacity: 0.15;
+      --aero-blur: 16px;
+    }
+
+    /* Light Theme Overrides */
+    body.theme-light {
+      --galaxy-accent: #7b2cbf;
+      --galaxy-glow: #9d4edd;
+      --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+      --mint-dark: #f0f2f5;
+      --mint-light-dark: #ffffff;
+      --mint-panel: #e4e7eb;
+      --text-color: #4a154b;
+      --text-main: #1d1c1d;
+      --border-color: #cbd5e1;
+      --window-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      --glass-backdrop: none;
+      --glass-border: 1px solid var(--border-color);
+      --glass-inner-shadow: none;
+    }
+
+    /* iOS-Style Ultra Liquid Glass Theme Overrides */
+    body.theme-glass {
+      --galaxy-accent: #007aff;
+      --galaxy-glow: #58a6ff;
+      --bg-gradient: radial-gradient(circle at 50% 30%, #1e3c72 0%, #2a5298 50%, #0f172a 100%);
+      --mint-dark: rgba(255, 255, 255, 0.18);
+      --mint-light-dark: rgba(255, 255, 255, 0.12);
+      --mint-panel: rgba(255, 255, 255, 0.22);
+      --text-color: #ffffff;
+      --text-main: #ffffff;
+      --border-color: rgba(255, 255, 255, 0.45);
+      --window-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+      --glass-backdrop: blur(25px) saturate(210%);
+      --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+      --glass-inner-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5), inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Clear Mode Sub-setting Overrides for Liquid Glass */
+    body.theme-glass.clear-mode {
+      --mint-dark: rgba(255, 255, 255, var(--aero-opacity));
+      --mint-light-dark: rgba(255, 255, 255, var(--aero-opacity));
+      --mint-panel: rgba(255, 255, 255, var(--aero-opacity));
+      --glass-backdrop: blur(var(--aero-blur)) saturate(180%);
+      --glass-border: 1px solid rgba(255, 255, 255, calc(var(--aero-opacity) + 0.15));
+      --window-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .installed-app {
+      display: none !important;
+    }
+
+    /* Startup Modal Overlay */
+    #startup-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+
+    .startup-modal-card {
+      width: 420px;
+      background: var(--mint-dark);
+      backdrop-filter: var(--glass-backdrop);
+      -webkit-backdrop-filter: var(--glass-backdrop);
+      border: var(--glass-border);
+      box-shadow: var(--window-shadow);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: modalPopupIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalPopupIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .startup-modal-icon {
+      font-size: 38px;
+    }
+
+    .startup-modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .startup-modal-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-main);
+    }
+
+    .startup-modal-link {
+      color: #7dd3fc;
+      word-break: break-all;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .startup-modal-link:hover {
+      text-decoration: underline;
+    }
+
+    .startup-modal-btn {
+      background: linear-gradient(135deg, #7b2cbf, #9d4edd);
+      border: var(--glass-border);
+      color: white;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 10px;
+    }
+
+    .startup-modal-btn:hover {
+      transform: scale(1.02);
+      filter: brightness(1.1);
+    }
+
+    /* Desktop Layout */
+    #desktop {
+      height: calc(100vh - 40px);
+      width: 100vw;
+      position: relative;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 15px;
+    }
+
+    .shortcut {
+      width: 90px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 8px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    body.theme-glass .shortcut {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: var(--glass-backdrop);
+      -webkit-backdrop-filter: var(--glass-backdrop);
+      border: var(--glass-border);
+      box-shadow: var(--glass-inner-shadow);
+    }
+
+    .shortcut:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .shortcut-icon {
+      font-size: 32px;
+      margin-bottom: 5px;
+    }
+
+    .shortcut-label {
+      font-size: 12px;
+      color: var(--text-main);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      font-weight: 500;
+    }
+
+    /* Taskbar / Panel */
+    #panel {
+      height: 48px;
+      width: calc(100vw - 30px);
+      margin: 0 auto 8px auto;
+      background-color: var(--mint-panel);
+      backdrop-filter: var(--glass-backdrop);
+      -webkit-backdrop-filter: var(--glass-backdrop);
+      position: fixed;
+      bottom: 0;
+      left: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: var(--glass-border);
+      box-shadow: var(--window-shadow);
+      border-radius: 24px;
+      z-index: 9999;
+      transition: background-color 0.1s ease, backdrop-filter 0.3s ease;
+    }
+
+    .panel-left, .panel-right {
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
+
+    #start-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+      height: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 24px 0 0 24px;
+    }
+
+    #start-btn:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .galaxy-logo-svg {
+      width: 24px;
+      height: 24px;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.6));
+      transition: transform 0.2s ease;
+    }
+
+    #start-btn:hover .galaxy-logo-svg {
+      transform: scale(1.1);
+    }
+
+    #tasks-container {
+      display: flex;
+      gap: 6px;
+      height: 100%;
+      align-items: center;
+    }
+
+    .task-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 14px;
+      height: 32px;
+      background-color: var(--mint-light-dark);
+      border: var(--glass-border);
+      box-shadow: var(--glass-inner-shadow);
+      border-radius: 16px;
+      font-size: 12px;
+      max-width: 150px;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+
+    .tray-clock {
+      padding: 0 18px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    /* Start Menu */
+    #start-menu {
+      position: fixed;
+      bottom: 64px;
+      left: 15px;
+      width: 320px;
+      height: 380px;
+      background-color: var(--mint-dark);
+      backdrop-filter: var(--glass-backdrop);
+      -webkit-backdrop-filter: var(--glass-backdrop);
+      border: var(--glass-border);
+      box-shadow: var(--window-shadow);
+      border-radius: 20px;
+      display: none;
+      flex-direction: column;
+      z-index: 9998;
+      overflow: hidden;
+      transition: background-color 0.1s ease;
+    }
+
+    .menu-header {
+      padding: 14px;
+      background: var(--mint-panel);
+      border-bottom: var(--glass-border);
+    }
+
+    .menu-header input {
+      width: 100%;
+      padding: 8px 14px;
+      background: var(--mint-light-dark);
+      border: var(--glass-border);
+      color: var(--text-main);
+      border-radius: 12px;
+      outline: none;
+    }
+
+    .menu-items {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    .menu-item:hover {
+      background-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Window Elements */
+    .window {
+      position: absolute;
+      top: 80px;
+      left: 150px;
+      width: 580px;
+      height: 440px;
+      background-color: var(--mint-dark);
+      backdrop-filter: var(--glass-backdrop);
+      -webkit-backdrop-filter: var(--glass-backdrop);
+      border: var(--glass-border);
+      box-shadow: var(--window-shadow);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      overflow: hidden;
+      transition: background-color 0.1s ease, border-color 0.1s ease;
+    }
+
+    .window.resizing-or-maximizing {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .window.maximized {
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: calc(100vh - 60px) !important;
+      border-radius: 0 !important;
+    }
+
+    .window-header {
+      height: 40px;
+      background-color: var(--mint-panel);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      cursor: move;
+      border-bottom: var(--glass-border);
+      transition: background-color 0.1s ease;
+    }
+
+    .window-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-color);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .win-btn {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: rgba(0,0,0,0.6);
+      font-weight: bold;
+    }
+
+    .win-close { background-color: #ff5f56; }
+    .win-max { background-color: #27c93f; }
+
+    .window-body {
+      flex-grow: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Settings UI */
+    .settings-container {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      color: var(--text-main);
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .settings-section {
+      background: var(--mint-light-dark);
+      border: var(--glass-border);
+      box-shadow: var(--glass-inner-shadow);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .settings-section h3 {
+      font-size: 15px;
+      margin-bottom: 12px;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .theme-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+    }
+
+    .theme-card {
+      border: var(--glass-border);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--mint-panel);
+      position: relative;
+    }
+
+    .theme-card:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .theme-card.active {
+      border-color: #fff;
+      background: rgba(255, 255, 255, 0.35);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.4), var(--glass-inner-shadow);
+    }
+
+    .theme-card-icon {
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+
+    .theme-card-title {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Aero Sub-setting toggle & Slider */
+    .aero-toggle-wrapper {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: opacity 0.3s ease;
+    }
+
+    .aero-toggle-wrapper.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .aero-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .aero-slider-container {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: var(--glass-border);
+    }
+
+    .aero-slider-container.active {
+      display: flex;
+    }
+
+    .aero-slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .aero-range-input {
+      width: 100%;
+      accent-color: var(--galaxy-accent);
+      cursor: pointer;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.2);
+      transition: .3s;
+      border-radius: 24px;
+      border: var(--glass-border);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--galaxy-accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Installer App & Multi-step Wizard */
+    .installer-window {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      height: 100%;
+    }
+
+    .installer-step {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .installer-step.active {
+      display: flex;
+    }
+
+    .installer-btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .installer-btn {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: var(--glass-backdrop);
+      border: var(--glass-border);
+      box-shadow: var(--glass-inner-shadow);
+      color: #fff;
+      padding: 10px 22px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .installer-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(1.03);
+    }
+
+    .installer-btn.btn-primary {
+      background: linear-gradient(135deg, #7b2cbf, #9d4edd);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .installer-btn.btn-primary:hover {
+      background: linear-gradient(135deg, #9d4edd, #c77dff);
+    }
+
+    .speed-options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 420px;
+      margin-top: 10px;
+    }
+
+    .speed-card {
+      background: var(--mint-light-dark);
+      border: var(--glass-border);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .speed-card:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .speed-card.selected {
+      border-color: var(--galaxy-accent);
+      background: rgba(157, 78, 221, 0.25);
+      box-shadow: 0 0 10px rgba(157, 78, 221, 0.4);
+    }
+
+    .speed-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      max-width: 420px;
+      height: 12px;
+      background: var(--mint-panel);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 20px;
+      display: none;
+      border: var(--glass-border);
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #38ef7d, #11998e);
+      transition: width 0.05s linear;
+    }
+
+    .terminal-body {
+      background-color: rgba(12, 10, 20, 0.85);
+      color: #7dd3fc;
+      font-family: 'Consolas', monospace;
+      font-size: 14px;
+      padding: 15px;
+      height: 100%;
+    }
+
+    .browser-bar {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      background: var(--mint-panel);
+      border-bottom: var(--glass-border);
+    }
+
+    .browser-bar input {
+      flex-grow: 1;
+      padding: 6px 12px;
+      background: var(--mint-light-dark);
+      border: var(--glass-border);
+      color: var(--text-main);
+      border-radius: 12px;
+      outline: none;
+    }
+
+    .browser-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #fff;
+    }
+
+    .terminal-input-line {
+      display: flex;
+      gap: 8px;
+    }
+
+    .terminal-input {
+      background: transparent;
+      border: none;
+      color: #7dd3fc;
+      font-family: inherit;
+      font-size: inherit;
+      flex-grow: 1;
+      outline: none;
+    }
+
+    /* Square App Store Grid */
+    .appstore-container {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 160px));
+      gap: 16px;
+      overflow-y: auto;
+      height: 100%;
+      justify-content: center;
+    }
+
+    .app-card {
+      width: 160px;
+      height: 160px;
+      background: var(--mint-light-dark);
+      border: var(--glass-border);
+      box-shadow: var(--glass-inner-shadow);
+      border-radius: 20px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      justify-content: space-between;
+    }
+
+    .app-card-icon {
+      font-size: 32px;
+      margin-top: 4px;
+    }
+
+    .app-card-title {
+      font-weight: 600;
+      color: var(--text-main);
+      font-size: 13px;
+    }
+
+    .app-card-desc {
+      font-size: 10px;
+      color: var(--text-color);
+      opacity: 0.9;
+      line-height: 1.2;
+    }
+
+    .app-card-btn {
+      background: rgba(255, 255, 255, 0.25);
+      border: var(--glass-border);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    .app-card-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .app-card-btn:disabled {
+      background: rgba(0, 0, 0, 0.2);
+      border: transparent;
+      cursor: default;
+    }
+
+    .app-card-progress-container {
+      width: 100%;
+      height: 6px;
+      background: var(--mint-panel);
+      border-radius: 6px;
+      overflow: hidden;
+      display: none;
+      border: var(--glass-border);
+    }
+
+    .app-card-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: #007aff;
+      transition: width 0.05s linear;
+    }
+
+    /* File Runner UI */
+    .file-runner-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 12px;
+      gap: 10px;
+      background: var(--mint-dark);
+      position: relative;
+    }
+
+    .file-runner-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .file-runner-controls select, 
+    .file-runner-controls button, 
+    .file-runner-btn-upload {
+      background: var(--mint-light-dark);
+      border: var(--glass-border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 12px;
+      outline: none;
+      font-size: 12px;
+    }
+
+    .file-runner-btn-upload {
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .file-runner-controls button.run-btn {
+      background: rgba(0, 122, 255, 0.6);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .file-runner-controls button.fullscreen-btn {
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    .file-runner-editor {
+      flex-grow: 1;
+      width: 100%;
+      background: var(--mint-light-dark);
+      border: var(--glass-border);
+      color: var(--text-color);
+      font-family: 'Consolas', monospace;
+      padding: 10px;
+      border-radius: 12px;
+      outline: none;
+      resize: none;
+    }
+
+    .file-runner-preview-wrapper {
+      position: relative;
+      height: 180px;
+      background: #000;
+      border: var(--glass-border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .file-runner-preview {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-runner-preview img,
+    .file-runner-preview video {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .file-runner-container.fullscreen-preview .file-runner-controls,
+    .file-runner-container.fullscreen-preview .file-runner-editor {
+      display: none !important;
+    }
+
+    .file-runner-container.fullscreen-preview .file-runner-preview-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      border: none;
+      z-index: 100;
+    }
+
+    .exit-fullscreen-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      border: var(--glass-border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 11px;
+      z-index: 101;
+      display: none;
+    }
+
+    .file-runner-container.fullscreen-preview .exit-fullscreen-btn {
+      display: block;
+    }
+  </style>
+</head>
+<body class="theme-dark">
+
+  <!-- Startup Notice Popup Modal -->
+  <div id="startup-modal-overlay">
+    <div class="startup-modal-card">
+      <div class="startup-modal-icon">⚠️</div>
+      <div class="startup-modal-title">Notice</div>
+      <div class="startup-modal-text" id="startup-modal-desc">
+        Soon this site will [if you click yes] redirect you to <a class="startup-modal-link" href="https://atlasos-official.github.io/Nova" target="_blank">https://atlasos-official.github.io/Nova</a> [not out yet] if you press no it will take you to the here still with this popup
+      </div>
+      <button class="startup-modal-btn" onclick="dismissStartupModal()">Understood</button>
+    </div>
+  </div>
+
+  <div id="desktop">
+    <div class="shortcut" id="installer-shortcut" onclick="openInstaller()">
+      <div class="shortcut-icon">💿</div>
+      <div class="shortcut-label">Install OS</div>
+    </div>
+    <div class="shortcut installed-app" onclick="openSettings()">
+      <div class="shortcut-icon">⚙️</div>
+      <div class="shortcut-label">Settings</div>
+    </div>
+    <div class="shortcut installed-app" onclick="openTerminal()">
+      <div class="shortcut-icon">💻</div>
+      <div class="shortcut-label">Terminal</div>
+    </div>
+    <div class="shortcut installed-app" onclick="openBrowser()">
+      <div class="shortcut-icon">🌐</div>
+      <div class="shortcut-label">Browser</div>
+    </div>
+    <div class="shortcut installed-app" onclick="openAppStore()">
+      <div class="shortcut-icon">🛍️</div>
+      <div class="shortcut-label">App Store</div>
+    </div>
+    <div class="shortcut installed-app file-runner-app" onclick="openFileRunner()">
+      <div class="shortcut-icon">📄</div>
+      <div class="shortcut-label">File Runner</div>
+    </div>
+    <div class="shortcut installed-app ajgconnect-app" onclick="openAjgConnect()">
+      <div class="shortcut-icon">💬</div>
+      <div class="shortcut-label">AJG Connect</div>
+    </div>
+    <div class="shortcut installed-app yt2-app" onclick="openYt2()">
+      <div class="shortcut-icon">📺</div>
+      <div class="shortcut-label">YT 2</div>
+    </div>
+  </div>
+
+  <div id="start-menu">
+    <div class="menu-header">
+      <input type="text" placeholder="Search Galaxy OS...">
+    </div>
+    <div class="menu-items">
+      <div class="menu-item" id="installer-menu-item" onclick="openInstaller(); toggleStartMenu();">
+        <span>💿</span> Install Galaxy OS
+      </div>
+      <div class="menu-item installed-app" onclick="openSettings(); toggleStartMenu();">
+        <span>⚙️</span> Settings
+      </div>
+      <div class="menu-item installed-app" onclick="openTerminal(); toggleStartMenu();">
+        <span>💻</span> Terminal
+      </div>
+      <div class="menu-item installed-app" onclick="openBrowser(); toggleStartMenu();">
+        <span>🌐</span> Browser
+      </div>
+      <div class="menu-item installed-app" onclick="openAppStore(); toggleStartMenu();">
+        <span>🛍️</span> App Store
+      </div>
+      <div class="menu-item installed-app file-runner-app" onclick="openFileRunner(); toggleStartMenu();">
+        <span>📄</span> File Runner
+      </div>
+      <div class="menu-item installed-app ajgconnect-app" onclick="openAjgConnect(); toggleStartMenu();">
+        <span>💬</span> AJG Connect
+      </div>
+      <div class="menu-item installed-app yt2-app" onclick="openYt2(); toggleStartMenu();">
+        <span>📺</span> YT 2
+      </div>
+    </div>
+  </div>
+
+  <div id="panel">
+    <div class="panel-left">
+      <button id="start-btn" onclick="toggleStartMenu()">
+        <svg class="galaxy-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="30" fill="url(#planetGradient)"/>
+          <ellipse cx="50" cy="50" rx="46" ry="14" stroke="url(#ringGradient)" stroke-width="6" transform="rotate(-25 50 50)"/>
+          <defs>
+            <linearGradient id="planetGradient" x1="20" y1="20" x2="80" y2="80">
+              <stop offset="0%" stop-color="#00c6ff" />
+              <stop offset="100%" stop-color="#007aff" />
+            </linearGradient>
+            <linearGradient id="ringGradient" x1="0" y1="0" x2="100" y2="0">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8" />
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0.2" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <span>Galaxy</span>
+      </button>
+      <div id="tasks-container"></div>
+    </div>
+    <div class="panel-right">
+      <div class="tray-clock" id="clock">12:00 PM</div>
+    </div>
+  </div>
+
+  <script>
+    let zIndexCounter = 100;
+    let installerWin = null;
+    let currentTheme = 'dark';
+    let isClearMode = false;
+    let aeroTransparencyPercent = 80;
+    let isFileRunnerInstalled = false;
+    let isAjgConnectInstalled = false;
+    let isYt2Installed = false;
+    let selectedInstallSpeedMs = 10000;
+    let pendingRmRfCommand = false;
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function dismissStartupModal() {
+      const modal = document.getElementById('startup-modal-overlay');
+      if (modal) {
+        modal.style.transition = 'opacity 0.2s ease';
+        modal.style.opacity = '0';
+        setTimeout(() => modal.remove(), 200);
+      }
+    }
+
+    function toggleStartMenu() {
+      const menu = document.getElementById('start-menu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('start-menu');
+      const startBtn = document.getElementById('start-btn');
+      if (menu && startBtn && !menu.contains(e.target) && !startBtn.contains(e.target)) {
+        menu.style.display = 'none';
+      }
+    });
+
+    function setTheme(theme) {
+      currentTheme = theme;
+      applyThemeClasses();
+      
+      document.querySelectorAll('.theme-card').forEach(card => {
+        if (card.dataset.theme === theme) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
+
+      const aeroToggle = document.getElementById('aero-toggle-wrapper');
+      if (aeroToggle) {
+        if (theme === 'glass') {
+          aeroToggle.classList.remove('disabled');
+        } else {
+          aeroToggle.classList.add('disabled');
+        }
+      }
+    }
+
+    function toggleClearMode(enabled) {
+      isClearMode = enabled;
+      applyThemeClasses();
+
+      const sliderContainer = document.getElementById('aero-slider-box');
+      if (sliderContainer) {
+        if (enabled) {
+          sliderContainer.classList.add('active');
+        } else {
+          sliderContainer.classList.remove('active');
+        }
+      }
+    }
+
+    function updateAeroOpacity(transparencyPercent) {
+      aeroTransparencyPercent = parseInt(transparencyPercent, 10);
+      
+      let computedOpacity = 1 - (aeroTransparencyPercent / 200);
+      if (computedOpacity < 0) computedOpacity = 0;
+
+      let blurAmount = Math.max(0, 20 - Math.floor((aeroTransparencyPercent / 200) * 20));
+
+      document.documentElement.style.setProperty('--aero-opacity', computedOpacity);
+      document.documentElement.style.setProperty('--aero-blur', blurAmount + 'px');
+      
+      const valDisplay = document.getElementById('aero-opacity-val');
+      if (valDisplay) {
+        valDisplay.innerText = aeroTransparencyPercent + '%';
+      }
+    }
+
+    function applyThemeClasses() {
+      let classNames = `theme-${currentTheme}`;
+      if (currentTheme === 'glass' && isClearMode) {
+        classNames += ' clear-mode';
+      }
+      document.body.className = classNames;
+    }
+
+    function createWindow(title, content, customClass = '') {
+      const win = document.createElement('div');
+      win.className = 'window';
+      win.style.zIndex = ++zIndexCounter;
+
+      win.style.top = (80 + (document.querySelectorAll('.window').length * 20)) + 'px';
+      win.style.left = (100 + (document.querySelectorAll('.window').length * 20)) + 'px';
+
+      win.innerHTML = `
+        <div class="window-header">
+          <span class="window-title">${title}</span>
+          <div class="window-controls">
+            <button class="win-btn win-max" onclick="toggleMaximize(this)" title="Maximize/Restore"></button>
+            <button class="win-btn win-close" onclick="closeWindow(this)" title="Close">×</button>
+          </div>
+        </div>
+        <div class="window-body ${customClass}">${content}</div>
+      `;
+
+      document.body.appendChild(win);
+      makeDraggable(win);
+      win.addEventListener('mousedown', () => win.style.zIndex = ++zIndexCounter);
+      
+      addTaskbarItem(title, win);
+      return win;
+    }
+
+    function closeWindow(btn) {
+      const win = btn.closest('.window');
+      win.remove();
+    }
+
+    function toggleMaximize(btn) {
+      const win = btn.closest('.window');
+      win.classList.add('resizing-or-maximizing');
+      
+      if (!win.classList.contains('maximized')) {
+        win.dataset.prevTop = win.style.top;
+        win.dataset.prevLeft = win.style.left;
+        win.dataset.prevWidth = win.style.width;
+        win.dataset.prevHeight = win.style.height;
+
+        win.classList.add('maximized');
+      } else {
+        win.classList.remove('maximized');
+        win.style.top = win.dataset.prevTop || '80px';
+        win.style.left = win.dataset.prevLeft || '150px';
+        win.style.width = win.dataset.prevWidth || '580px';
+        win.style.height = win.dataset.prevHeight || '420px';
+      }
+
+      setTimeout(() => win.classList.remove('resizing-or-maximizing'), 200);
+    }
+
+    function runTimedProgress(barElement, durationMs, statusCallback, completeCallback) {
+      if (durationMs === 0) {
+        barElement.style.width = '100%';
+        if (statusCallback) statusCallback(100, 0);
+        if (completeCallback) completeCallback();
+        return;
+      }
+
+      const intervalMs = 30;
+      let elapsedTime = 0;
+
+      const interval = setInterval(() => {
+        elapsedTime += intervalMs;
+        const progress = Math.min((elapsedTime / durationMs) * 100, 100);
+        barElement.style.width = progress + '%';
+
+        if (statusCallback) statusCallback(progress, elapsedTime);
+
+        if (elapsedTime >= durationMs) {
+          clearInterval(interval);
+          if (completeCallback) completeCallback();
+        }
+      }, intervalMs);
+    }
+
+    // Settings App
+    function openSettings() {
+      const settingsHTML = `
+        <div class="settings-container">
+          <h2>Galaxy OS Settings</h2>
+          
+          <div class="settings-section">
+            <h3>🎨 Personalization & Theme</h3>
+            <p style="font-size: 12px; margin-bottom: 14px; opacity: 0.8;">Choose your preferred desktop appearance:</p>
+            <div class="theme-options">
+              <div class="theme-card ${currentTheme === 'dark' ? 'active' : ''}" data-theme="dark" onclick="setTheme('dark')">
+                <div class="theme-card-icon">🌙</div>
+                <div class="theme-card-title">Dark Mode</div>
+              </div>
+              <div class="theme-card ${currentTheme === 'light' ? 'active' : ''}" data-theme="light" onclick="setTheme('light')">
+                <div class="theme-card-icon">☀️</div>
+                <div class="theme-card-title">Light Mode</div>
+              </div>
+              <div class="theme-card ${currentTheme === 'glass' ? 'active' : ''}" id="glass-theme-card" data-theme="glass" onclick="setTheme('glass')">
+                <div class="theme-card-icon">💧</div>
+                <div class="theme-card-title">Liquid Glass</div>
+              </div>
+            </div>
+
+            <div class="aero-toggle-wrapper ${currentTheme !== 'glass' ? 'disabled' : ''}" id="aero-toggle-wrapper">
+              <div class="aero-toggle-row">
+                <div>
+                  <strong style="font-size: 13px;">Clear (Aero Glass)</strong>
+                  <p style="font-size: 11px; opacity: 0.7;">Enables full transparent blur effect across windows and taskbar.</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="aero-checkbox" ${isClearMode ? 'checked' : ''} onchange="toggleClearMode(this.checked)">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="aero-slider-container ${isClearMode ? 'active' : ''}" id="aero-slider-box">
+                <div class="aero-slider-header">
+                  <span>Glass Transparency</span>
+                  <span id="aero-opacity-val">${aeroTransparencyPercent}%</span>
+                </div>
+                <input type="range" class="aero-range-input" min="0" max="200" step="1" value="${aeroTransparencyPercent}" oninput="updateAeroOpacity(this.value)">
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>ℹ️ System Information</h3>
+            <p style="font-size: 13px; line-height: 1.6;">
+              <strong>OS Version:</strong> Galaxy OS 1.0 Live<br>
+              <strong>Kernel:</strong> Web-JS Core
+            </p>
+          </div>
+        </div>
+      `;
+      createWindow('Settings', settingsHTML);
+      updateAeroOpacity(aeroTransparencyPercent);
+    }
+
+    // Multi-Step Galaxy OS Installer
+    function openInstaller() {
+      if (document.getElementById('installer-window-el')) return;
+
+      const installerHTML = `
+        <div class="installer-window" id="installer-window-el">
+          
+          <div class="installer-step active" id="installer-step-1">
+            <h2>Step 1: Choose Installation Speed</h2>
+            <p style="font-size: 12px; color: var(--text-color); margin-top: 4px;">Select how fast you want Galaxy OS to install:</p>
+
+            <div class="speed-options-grid">
+              <div class="speed-card ${selectedInstallSpeedMs === 10000 ? 'selected' : ''}" id="speed-10000" onclick="selectSpeedOption(10000)">
+                <div>
+                  <strong>Normal</strong>
+                  <div style="font-size: 11px; opacity: 0.7;">Standard deployment</div>
+                </div>
+                <span class="speed-tag">10 seconds</span>
+              </div>
+
+              <div class="speed-card ${selectedInstallSpeedMs === 3000 ? 'selected' : ''}" id="speed-3000" onclick="selectSpeedOption(3000)">
+                <div>
+                  <strong>Fast</strong>
+                  <div style="font-size: 11px; opacity: 0.7;">Quick deployment</div>
+                </div>
+                <span class="speed-tag">3 seconds</span>
+              </div>
+
+              <div class="speed-card ${selectedInstallSpeedMs === 1000 ? 'selected' : ''}" id="speed-1000" onclick="selectSpeedOption(1000)">
+                <div>
+                  <strong>Turbo</strong>
+                  <div style="font-size: 11px; opacity: 0.7;">Lightning fast</div>
+                </div>
+                <span class="speed-tag">1 second</span>
+              </div>
+
+              <div class="speed-card ${selectedInstallSpeedMs === 0 ? 'selected' : ''}" id="speed-0" onclick="selectSpeedOption(0)">
+                <div>
+                  <strong>INSTANT</strong>
+                  <div style="font-size: 11px; opacity: 0.7;">Zero delay installation</div>
+                </div>
+                <span class="speed-tag">Instant (0s)</span>
+              </div>
+            </div>
+
+            <div class="installer-btn-group">
+              <button class="installer-btn btn-primary" onclick="goToInstallerStep(2)">Next</button>
+            </div>
+          </div>
+
+          <div class="installer-step" id="installer-step-2">
+            <h2>Step 2: Ready to Install</h2>
+            <p style="margin-top: 10px; color: var(--text-color); font-size: 13px;" id="speed-summary-text">
+              Ready to deploy Galaxy OS.
+            </p>
+            
+            <div class="progress-bar-container" id="progress-container">
+              <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <p id="install-status" style="margin-top: 12px; font-size: 13px; color: var(--text-color);"></p>
+
+            <div class="installer-btn-group" id="step2-controls">
+              <button class="installer-btn" onclick="goToInstallerStep(1)">Back</button>
+              <button class="installer-btn btn-primary" onclick="runInstallationProcess(this)">Install Now</button>
+            </div>
+          </div>
+
+        </div>
+      `;
+      installerWin = createWindow('Install Galaxy OS', installerHTML);
+    }
+
+    function goToInstallerStep(stepNum) {
+      document.querySelectorAll('.installer-step').forEach(step => step.classList.remove('active'));
+      const activeStep = document.getElementById(`installer-step-${stepNum}`);
+      if (activeStep) activeStep.classList.add('active');
+
+      if (stepNum === 2) {
+        let displayRealTime = (selectedInstallSpeedMs / 1000).toFixed(1);
+        document.getElementById('speed-summary-text').innerHTML = 
+          `Selected Speed: <strong>${selectedInstallSpeedMs === 0 ? 'Instant' : displayRealTime + ' Seconds'}</strong>`;
+      }
+    }
+
+    function selectSpeedOption(realSpeedMs) {
+      selectedInstallSpeedMs = realSpeedMs;
+
+      document.querySelectorAll('.speed-card').forEach(card => card.classList.remove('selected'));
+      const activeCard = document.getElementById(`speed-${realSpeedMs}`);
+      if (activeCard) activeCard.classList.add('selected');
+    }
+
+    function runInstallationProcess(btn) {
+      document.getElementById('step2-controls').style.display = 'none';
+      const container = document.getElementById('progress-container');
+      const progressBar = document.getElementById('progress-bar');
+      const statusText = document.getElementById('install-status');
+
+      container.style.display = 'block';
+
+      runTimedProgress(
+        progressBar,
+        selectedInstallSpeedMs,
+        (progress, elapsedTime) => {
+          if (progress < 50) statusText.innerText = `Extracting system files... (${Math.round(progress)}%)`;
+          else if (progress < 100) statusText.innerText = `Configuring user environment... (${Math.round(progress)}%)`;
+          else statusText.innerText = "Installation complete!";
+        },
+        () => {
+          setTimeout(() => {
+            document.getElementById('installer-shortcut')?.remove();
+            document.getElementById('installer-menu-item')?.remove();
+            
+            document.querySelectorAll('.installed-app:not(.file-runner-app):not(.ajgconnect-app):not(.yt2-app)').forEach(app => {
+              app.classList.remove('installed-app');
+            });
+            
+            if (installerWin) installerWin.remove();
+            alert("Galaxy OS has been successfully installed!");
+          }, 150);
+        }
+      );
+    }
+
+    // App Store (with 5-second installation speed)
+    function openAppStore() {
+      const storeHTML = `
+        <div class="appstore-container">
+          <div class="app-card">
+            <div class="app-card-icon">💧</div>
+            <div class="app-card-title">Liquid Glass</div>
+            <div class="app-card-desc">Ultra liquid glass theme styling.</div>
+            <button class="app-card-btn" id="store-glass-btn" onclick="setTheme('glass')">
+              Apply Theme
+            </button>
+          </div>
+
+          <div class="app-card">
+            <div class="app-card-icon">📄</div>
+            <div class="app-card-title">File Runner</div>
+            <div class="app-card-desc">Execute HTML, scripts, audio, video, & images.</div>
+            <button class="app-card-btn" onclick="installFileRunnerApp(this)" ${isFileRunnerInstalled ? 'disabled' : ''}>
+              ${isFileRunnerInstalled ? 'Installed' : 'Install'}
+            </button>
+            <div class="app-card-progress-container">
+              <div class="app-card-progress-bar"></div>
+            </div>
+          </div>
+
+          <div class="app-card">
+            <div class="app-card-icon">💬</div>
+            <div class="app-card-title">AJG Connect</div>
+            <div class="app-card-desc">Connect and chat live across Galaxy.</div>
+            <button class="app-card-btn" onclick="installAjgConnectApp(this)" ${isAjgConnectInstalled ? 'disabled' : ''}>
+              ${isAjgConnectInstalled ? 'Installed' : 'Install'}
+            </button>
+            <div class="app-card-progress-container">
+              <div class="app-card-progress-bar"></div>
+            </div>
+          </div>
+
+          <div class="app-card">
+            <div class="app-card-icon">📺</div>
+            <div class="app-card-title">YT 2</div>
+            <div class="app-card-desc">Watch video streams and content across Galaxy.</div>
+            <button class="app-card-btn" onclick="installYt2App(this)" ${isYt2Installed ? 'disabled' : ''}>
+              ${isYt2Installed ? 'Installed' : 'Install'}
+            </button>
+            <div class="app-card-progress-container">
+              <div class="app-card-progress-bar"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      createWindow('App Store', storeHTML);
+    }
+
+    function installFileRunnerApp(btn) {
+      if (isFileRunnerInstalled) return;
+
+      const card = btn.closest('.app-card');
+      const progressContainer = card.querySelector('.app-card-progress-container');
+      const progressBar = card.querySelector('.app-card-progress-bar');
+
+      btn.style.display = 'none';
+      progressContainer.style.display = 'block';
+
+      runTimedProgress(progressBar, 5000, null, () => {
+        isFileRunnerInstalled = true;
+        progressContainer.style.display = 'none';
+        btn.innerText = "Installed";
+        btn.style.display = 'block';
+        btn.disabled = true;
+
+        document.querySelectorAll('.file-runner-app').forEach(app => {
+          app.classList.remove('installed-app');
+        });
+        alert("File Runner installed successfully!");
+      });
+    }
+
+    function installAjgConnectApp(btn) {
+      if (isAjgConnectInstalled) return;
+
+      const card = btn.closest('.app-card');
+      const progressContainer = card.querySelector('.app-card-progress-container');
+      const progressBar = card.querySelector('.app-card-progress-bar');
+
+      btn.style.display = 'none';
+      progressContainer.style.display = 'block';
+
+      runTimedProgress(progressBar, 5000, null, () => {
+        isAjgConnectInstalled = true;
+        progressContainer.style.display = 'none';
+        btn.innerText = "Installed";
+        btn.style.display = 'block';
+        btn.disabled = true;
+
+        document.querySelectorAll('.ajgconnect-app').forEach(app => {
+          app.classList.remove('installed-app');
+        });
+        alert("AJG Connect installed successfully!");
+      });
+    }
+
+    function installYt2App(btn) {
+      if (isYt2Installed) return;
+
+      const card = btn.closest('.app-card');
+      const progressContainer = card.querySelector('.app-card-progress-container');
+      const progressBar = card.querySelector('.app-card-progress-bar');
+
+      btn.style.display = 'none';
+      progressContainer.style.display = 'block';
+
+      runTimedProgress(progressBar, 5000, null, () => {
+        isYt2Installed = true;
+        progressContainer.style.display = 'none';
+        btn.innerText = "Installed";
+        btn.style.display = 'block';
+        btn.disabled = true;
+
+        document.querySelectorAll('.yt2-app').forEach(app => {
+          app.classList.remove('installed-app');
+        });
+        alert("YT 2 installed successfully!");
+      });
+    }
+
+    function openAjgConnect() {
+      const ajgConnectHTML = `<iframe class="browser-frame" src="https://AtlasOs-Official.github.io/Galaxy/chats.html"></iframe>`;
+      createWindow('AJG Connect', ajgConnectHTML);
+    }
+
+    function openYt2() {
+      const yt2HTML = `<iframe class="browser-frame" src="https://yt-2.on.websim.com"></iframe>`;
+      createWindow('YT 2', yt2HTML);
+    }
+
+    function openFileRunner() {
+      const runnerHTML = `
+        <div class="file-runner-container">
+          <div class="file-runner-controls">
+            <select id="file-type-select" onchange="updateDefaultScriptTemplate(this)">
+              <option value="html">HTML File (.html)</option>
+              <option value="bat">Batch Script (.bat)</option>
+              <option value="image">Image (.png, .jpg, .gif, .svg)</option>
+              <option value="audio">Audio (.mp3, .wav, .ogg)</option>
+              <option value="video">Video (.mp4, .webm, .ogg)</option>
+            </select>
+            
+            <label class="file-runner-btn-upload">
+              📁 Upload File
+              <input type="file" accept=".html,.htm,.bat,.png,.jpg,.jpeg,.gif,.svg,.webp,.mp3,.wav,.ogg,.mp4,.webm" style="display: none;" onchange="handleFileUpload(this)">
+            </label>
+
+            <button class="run-btn" onclick="executeRunnerScript(this)">Run File</button>
+            <button class="fullscreen-btn" onclick="togglePreviewFullscreen(this)">⛶ Fullscreen</button>
+          </div>
+          <textarea class="file-runner-editor" id="file-code-input"><h1 style="color: #9d4edd; font-family: sans-serif;">Hello Galaxy OS!</h1>\n<p style="color: #fff;">HTML file successfully rendered.</p></textarea>
+          <div class="file-runner-preview-wrapper">
+            <button class="exit-fullscreen-btn" onclick="togglePreviewFullscreen(this)">✕ Exit Fullscreen</button>
+            <div class="file-runner-preview" id="file-runner-output"></div>
+          </div>
+        </div>
+      `;
+      createWindow('File Runner', runnerHTML);
+    }
+
+    function togglePreviewFullscreen(btn) {
+      btn.closest('.file-runner-container').classList.toggle('fullscreen-preview');
+    }
+
+    function handleFileUpload(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const container = input.closest('.file-runner-container');
+      const select = container.querySelector('#file-type-select');
+      const editor = container.querySelector('#file-code-input');
+      const fileName = file.name.toLowerCase();
+      
+      if (fileName.endsWith('.bat')) select.value = 'bat';
+      else if (fileName.endsWith('.html') || fileName.endsWith('.htm')) select.value = 'html';
+      else if (/\.(png|jpe?g|gif|svg|webp)$/i.test(fileName)) select.value = 'image';
+      else if (/\.(mp3|wav|ogg)$/i.test(fileName)) select.value = 'audio';
+      else if (/\.(mp4|webm)$/i.test(fileName)) select.value = 'video';
+
+      const reader = new FileReader();
+
+      if (select.value === 'html' || select.value === 'bat') {
+        reader.onload = e => { editor.value = e.target.result; executeRunnerScript(input); };
+        reader.readAsText(file);
+      } else {
+        reader.onload = e => { editor.value = e.target.result; executeRunnerScript(input); };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function updateDefaultScriptTemplate(select) {
+      const editor = select.closest('.file-runner-container').querySelector('#file-code-input');
+      const type = select.value;
+
+      if (type === 'html') {
+        editor.value = `<h1 style="color: #9d4edd; font-family: sans-serif;">Hello Galaxy OS!</h1>\n<p style="color: #fff;">HTML file successfully rendered.</p>`;
+      } else if (type === 'bat') {
+        editor.value = `@echo off\necho Running Batch Script...\necho Success!`;
+      } else if (type === 'image') {
+        editor.value = `https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80`;
+      } else if (type === 'audio') {
+        editor.value = `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3`;
+      } else if (type === 'video') {
+        editor.value = `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4`;
+      }
+    }
+
+    function executeRunnerScript(btn) {
+      const container = btn.closest('.file-runner-container');
+      const type = container.querySelector('#file-type-select').value;
+      const content = container.querySelector('#file-code-input').value.trim();
+      const output = container.querySelector('#file-runner-output');
+
+      output.innerHTML = '';
+
+      if (type === 'html') {
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.background = '#ffffff';
+        output.appendChild(iframe);
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(content);
+        iframe.contentWindow.document.close();
+      } else if (type === 'bat') {
+        const consoleDiv = document.createElement('div');
+        consoleDiv.style.padding = '12px';
+        consoleDiv.style.color = '#38ef7d';
+        consoleDiv.style.fontFamily = 'monospace';
+        consoleDiv.style.fontSize = '13px';
+        consoleDiv.style.whiteSpace = 'pre-wrap';
+        
+        let outputText = '';
+        content.split('\n').forEach(line => {
+          let trimmed = line.trim();
+          if (trimmed.startsWith('echo ')) outputText += trimmed.substring(5) + '\n';
+          else if (trimmed !== '@echo off' && trimmed !== '') outputText += `>'${trimmed}' executed.\n`;
+        });
+
+        consoleDiv.innerText = outputText || 'Execution completed.';
+        output.appendChild(consoleDiv);
+      } else if (type === 'image') {
+        const img = document.createElement('img');
+        img.src = content;
+        output.appendChild(img);
+      } else if (type === 'audio') {
+        const audio = document.createElement('audio');
+        audio.controls = true;
+        audio.autoplay = true;
+        audio.src = content;
+        output.appendChild(audio);
+      } else if (type === 'video') {
+        const video = document.createElement('video');
+        video.controls = true;
+        video.autoplay = true;
+        video.src = content;
+        output.appendChild(video);
+      }
+    }
+
+    function openBrowser() {
+      const browserHTML = `
+        <div class="browser-bar">
+          <input type="text" id="browser-url" value="https://wikipedia.org">
+          <button style="padding: 0 12px; border-radius: 12px; border: var(--glass-border); background: var(--mint-light-dark); color: #fff;" onclick="loadUrl(this)">Go</button>
+        </div>
+        <iframe class="browser-frame" src="https://wikipedia.org"></iframe>
+      `;
+      createWindow('Browser', browserHTML);
+    }
+
+    function loadUrl(btn) {
+      const win = btn.closest('.window');
+      const input = win.querySelector('#browser-url');
+      const iframe = win.querySelector('.browser-frame');
+      let url = input.value;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+      iframe.src = url;
+    }
+
+    function openTerminal() {
+      const terminalHTML = `
+        <div>Galaxy OS v1.0 (Terminal Shell)</div>
+        <div>Type 'help' or 'clear'.</div><br>
+        <div id="term-output"></div>
+        <div class="terminal-input-line">
+          <span id="term-prompt">user@galaxy-os:~$</span>
+          <input type="text" class="terminal-input" autofocus onkeydown="handleTerminal(event, this)">
+        </div>
+      `;
+      createWindow('Terminal', terminalHTML, 'terminal-body');
+    }
+
+    function triggerSystemDestruction(terminalInput) {
+      const terminalWin = terminalInput.closest('.window');
+      const output = terminalInput.parentElement.previousElementSibling;
+
+      output.innerHTML += `<div style="color: #ff5f56; font-weight: bold;">[SYSTEM DESTRUCTION INITIATED]</div>`;
+
+      const destroySteps = [
+        () => {
+          output.innerHTML += `<div>Deleting system binaries /bin, /usr, /sys...</div>`;
+          document.querySelectorAll('.shortcut').forEach((sc, i) => {
+            setTimeout(() => sc.remove(), i * 150);
+          });
+        },
+        () => {
+          output.innerHTML += `<div>Removing desktop icons and shortcuts...</div>`;
+          document.querySelectorAll('.menu-item').forEach((mi, i) => {
+            setTimeout(() => mi.remove(), i * 100);
+          });
+        },
+        () => {
+          output.innerHTML += `<div>Purging Start menu and application registries...</div>`;
+          document.getElementById('start-menu')?.remove();
+        },
+        () => {
+          output.innerHTML += `<div>Closing active windows...</div>`;
+          document.querySelectorAll('.window').forEach(win => {
+            if (win !== terminalWin) win.remove();
+          });
+        },
+        () => {
+          output.innerHTML += `<div>Destroying Taskbar Panel and Clock...</div>`;
+          document.getElementById('panel')?.remove();
+        },
+        () => {
+          output.innerHTML += `<div>Wiping system theme memory and background wallpapers...</div>`;
+          document.body.style.background = '#000000';
+          document.body.style.backgroundImage = 'none';
+          document.body.className = '';
+        },
+        () => {
+          output.innerHTML += `<div style="color: #ff5f56; font-weight: bold;">Deleting active Terminal session...</div>`;
+          setTimeout(() => {
+            document.body.innerHTML = '';
+            document.body.style.background = '#000';
+          }, 1500);
+        }
+      ];
+
+      destroySteps.forEach((step, idx) => {
+        setTimeout(step, idx * 1000);
+      });
+    }
+
+    function handleTerminal(e, input) {
+      if (e.key === 'Enter') {
+        const rawCommand = input.value.trim();
+        const command = rawCommand.toLowerCase();
+        const output = input.parentElement.previousElementSibling;
+        const promptLabel = document.getElementById('term-prompt');
+        
+        let response = '';
+
+        if (pendingRmRfCommand) {
+          output.innerHTML += `<div>[Y/N]: ${rawCommand}</div>`;
+          if (command === 'y') {
+            pendingRmRfCommand = false;
+            promptLabel.innerText = 'sudo:';
+            input.value = '';
+            triggerSystemDestruction(input);
+            return;
+          } else if (command === 'n') {
+            pendingRmRfCommand = false;
+            promptLabel.innerText = 'user@galaxy-os:~$';
+            output.innerHTML += `<div>Operation cancelled by user.</div>`;
+            input.value = '';
+            return;
+          } else {
+            output.innerHTML += `<div style="color: #ff5f56;">Invalid input. Please type Y to confirm or N to cancel [Y/N]:</div>`;
+            input.value = '';
+            return;
+          }
+        }
+
+        if (command === 'help') {
+          response = 'Available commands: help, clear, whoami, date, sudo rm -rf /*';
+        } else if (command === 'clear') {
+          output.innerHTML = '';
+          input.value = '';
+          return;
+        } else if (command === 'whoami') {
+          response = 'galaxy-user';
+        } else if (command === 'date') {
+          response = new Date().toString();
+        } else if (command === 'sudo rm -rf /*') {
+          pendingRmRfCommand = true;
+          output.innerHTML += `<div>user@galaxy-os:~$ ${rawCommand}</div>`;
+          output.innerHTML += `<div style="color: #ff5f56; font-weight: bold;">WARNING: This will delete EVERYTHING on this system, including apps, desktop, taskbar, background, and this terminal!</div>`;
+          output.innerHTML += `<div style="color: #ffbb00;">Do you want to continue? [Y/N]:</div>`;
+          promptLabel.innerText = 'confirm [y/n]:';
+          input.value = '';
+          return;
+        } else if (command !== '') {
+          response = `command not found: ${rawCommand}`;
+        }
+
+        output.innerHTML += `<div>user@galaxy-os:~$ ${rawCommand}</div>`;
+        if (response) output.innerHTML += `<div>${response}</div>`;
+        
+        input.value = '';
+        input.scrollIntoView();
+      }
+    }
+
+    function addTaskbarItem(title, winElement) {
+      const container = document.getElementById('tasks-container');
+      if (!container) return;
+      const tab = document.createElement('div');
+      tab.className = 'task-tab';
+      tab.innerText = title;
+      tab.onclick = () => winElement.style.zIndex = ++zIndexCounter;
+      container.appendChild(tab);
+
+      const observer = new MutationObserver(() => {
+        if (!document.body.contains(winElement)) {
+          tab.remove();
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.body, { childList: true });
+    }
+
+    function makeDraggable(elmnt) {
+      let startX = 0, startY = 0;
+      let initialLeft = 0, initialTop = 0;
+      let isDragging = false;
+      let animationFrameId = null;
+
+      const header = elmnt.querySelector('.window-header');
+
+      header.onmousedown = (e) => {
+        if (elmnt.classList.contains('maximized') || e.target.classList.contains('win-btn')) return;
+
+        e.preventDefault();
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = elmnt.offsetLeft;
+        initialTop = elmnt.offsetTop;
+        isDragging = true;
+
+        document.onmousemove = onMouseMove;
+        document.onmouseup = stopDragging;
+      };
+
+      function onMouseMove(e) {
+        if (!isDragging) return;
+
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+        animationFrameId = requestAnimationFrame(() => {
+          elmnt.style.left = `${initialLeft + deltaX}px`;
+          elmnt.style.top = `${initialTop + deltaY}px`;
+        });
+      }
+
+      function stopDragging() {
+        isDragging = false;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        document.onmousemove = null;
+        document.onmouseup = null;
+      }
+    }
+  </script>
+</body>
+</html>
